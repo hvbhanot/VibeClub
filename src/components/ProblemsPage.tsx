@@ -186,7 +186,7 @@ export function ProblemsPage({ userProgress, onSelectProblem }: ProblemsPageProp
   return (
     <div className="min-h-screen pb-12">
       {/* Header */}
-      <div className="relative overflow-hidden pt-8 pb-6">
+      <div className="relative pt-8 pb-6">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-purple-500/8 rounded-full blur-[120px] pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-6 relative z-10">
@@ -320,10 +320,10 @@ export function ProblemsPage({ userProgress, onSelectProblem }: ProblemsPageProp
                 {showCategoryDropdown && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setShowCategoryDropdown(false)} />
-                    <div className="absolute top-full mt-1 left-0 z-50 w-48 glass-card rounded-lg border border-white/10 py-1 shadow-xl">
+                    <div className="absolute top-full mt-1 left-0 z-50 w-48 rounded-lg border border-white/10 py-1 shadow-2xl bg-[#141420] backdrop-blur-xl">
                       <button
                         onClick={() => { setCategoryFilter('all'); setShowCategoryDropdown(false); }}
-                        className={`w-full text-left px-3 py-1.5 text-xs hover:bg-white/5 transition-colors ${categoryFilter === 'all' ? 'text-white' : 'text-gray-400'}`}
+                        className={`w-full text-left px-3 py-2 text-xs hover:bg-white/5 transition-colors ${categoryFilter === 'all' ? 'text-white' : 'text-gray-400'}`}
                       >
                         All Categories
                       </button>
@@ -331,7 +331,7 @@ export function ProblemsPage({ userProgress, onSelectProblem }: ProblemsPageProp
                         <button
                           key={cat}
                           onClick={() => { setCategoryFilter(cat); setShowCategoryDropdown(false); }}
-                          className={`w-full text-left px-3 py-1.5 text-xs hover:bg-white/5 transition-colors flex items-center gap-2 ${categoryFilter === cat ? 'text-white' : 'text-gray-400'}`}
+                          className={`w-full text-left px-3 py-2 text-xs hover:bg-white/5 transition-colors flex items-center gap-2 ${categoryFilter === cat ? 'text-white' : 'text-gray-400'}`}
                         >
                           {getCategoryIcon(cat)}
                           {getCategoryLabel(cat)}
