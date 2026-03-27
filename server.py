@@ -8,9 +8,6 @@ import builtins
 import hashlib as _hashlib
 import random
 import string
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 
 # Import standard library modules used in problems
 import math
@@ -61,15 +58,9 @@ app = Flask(__name__, static_folder=None)
 CORS(app)
 
 # ---------------------------------------------------------------------------
-# Email verification config (Brevo SMTP)
+# Email domain restriction
 # ---------------------------------------------------------------------------
-BREVO_SMTP_KEY = os.environ.get('BREVO_SMTP_KEY', '')
-BREVO_SMTP_LOGIN = os.environ.get('BREVO_SMTP_LOGIN', '')
-BREVO_FROM = os.environ.get('BREVO_FROM', BREVO_SMTP_LOGIN)
-ALLOWED_EMAIL_DOMAIN = 'islander.tamucc.edu'
-
-# In-memory store for pending verifications: {email: {code, expires, attempts}}
-_pending_verifications = {}
+ALLOWED_EMAIL_DOMAINS = ['islander.tamucc.edu', 'tamucc.edu']
 
 # ---------------------------------------------------------------------------
 # Database setup - Supports both PostgreSQL (production) and SQLite (local)
@@ -212,119 +203,8 @@ def get_row_value(row, column, columns=None):
 # ---------------------------------------------------------------------------
 
 
-def _generate_code():
-    return ''.join(random.choices(string.digits, k=6))
-
-
-def _send_verification_email(email, code):
-    """Send a 6-digit verification code via Brevo SMTP."""
-    if not BREVO_SMTP_KEY or not BREVO_SMTP_LOGIN:
-        # If Brevo not configured, log code to console (dev mode)
-        print(f"[DEV] Verification code for {email}: {code}", flush=True)
-        return True
-
-    msg = MIMEMultipart("alternative")
-    msg["From"] = BREVO_FROM
-    msg["To"] = email
-    msg["Subject"] = "VibeClub - Verify Your Islander Email"
-
-    html_body = f"""\
-<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; padding: 32px;">
-    <h2 style="color: #a855f7; margin-bottom: 8px;">VibeClub</h2>
-    <p style="color: #666; margin-bottom: 24px;">Verify your Islander email to create your account.</p>
-    <div style="background: #1a1a2e; border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 24px;">
-        <p style="color: #999; margin: 0 0 8px 0; font-size: 14px;">Your verification code</p>
-        <p style="color: #fff; font-size: 32px; font-weight: bold; letter-spacing: 8px; margin: 0;">{code}</p>
-    </div>
-    <p style="color: #999; font-size: 13px;">This code expires in 10 minutes. If you didn't request this, ignore this email.</p>
-</div>"""
-    msg.attach(MIMEText(html_body, "html"))
-
-    try:
-        server = smtplib.SMTP("smtp-relay.brevo.com", 587)
-        server.starttls()
-        server.login(BREVO_SMTP_LOGIN, BREVO_SMTP_KEY)
-        server.sendmail(BREVO_FROM, email, msg.as_string())
-        server.quit()
-        print(f"[BREVO] Sent verification to {email}", flush=True)
-        return True
-    except Exception as e:
-        print(f"[BREVO ERROR] {e}", flush=True)
-        return False
-
-
-@app.route("/api/auth/send-verification", methods=["POST"])
-def send_verification():
-    try:
-        data = request.get_json()
-        email = data.get("email", "").strip().lower()
-        print(f"[VERIFY] Send verification request for: {email}", flush=True)
-
-        if not email:
-            return jsonify({"success": False, "error": "Email is required"}), 400
-
-        # Validate islander email
-        if not email.endswith(f"@{ALLOWED_EMAIL_DOMAIN}"):
-            return jsonify({"success": False, "error": f"Only @{ALLOWED_EMAIL_DOMAIN} emails are allowed"}), 400
-
-        # Check if email already registered (skip if column doesn't exist yet)
-        try:
-            db = get_db()
-            existing = db_fetchone(db, "SELECT 1 FROM users WHERE email = ?", (email,))
-            if existing:
-                return jsonify({"success": False, "error": "This email is already registered"}), 409
-        except Exception as db_err:
-            print(f"[VERIFY] DB check skipped (email column may not exist): {db_err}", flush=True)
-
-        # Rate limit: don't resend if last code was sent < 60s ago
-        pending = _pending_verifications.get(email)
-        if pending and time.time() - pending.get("sent_at", 0) < 60:
-            return jsonify({"success": False, "error": "Please wait before requesting a new code"}), 429
-
-        code = _generate_code()
-        _pending_verifications[email] = {
-            "code": code,
-            "expires": time.time() + 600,  # 10 min
-            "attempts": 0,
-            "sent_at": time.time(),
-        }
-        print(f"[VERIFY] Generated code for {email}: {code}", flush=True)
-
-        if _send_verification_email(email, code):
-            return jsonify({"success": True, "message": "Verification code sent"})
-        else:
-            return jsonify({"success": False, "error": "Failed to send email. Try again later."}), 500
-    except Exception as e:
-        print(f"[VERIFY ERROR] {traceback.format_exc()}", flush=True)
-        return jsonify({"success": False, "error": "Server error. Try again."}), 500
-
-
-@app.route("/api/auth/verify-code", methods=["POST"])
-def verify_code():
-    data = request.get_json()
-    email = data.get("email", "").strip().lower()
-    code = data.get("code", "").strip()
-
-    pending = _pending_verifications.get(email)
-    if not pending:
-        return jsonify({"success": False, "error": "No verification pending for this email. Request a new code."}), 400
-
-    if time.time() > pending["expires"]:
-        del _pending_verifications[email]
-        return jsonify({"success": False, "error": "Code expired. Request a new one."}), 400
-
-    if pending["attempts"] >= 5:
-        del _pending_verifications[email]
-        return jsonify({"success": False, "error": "Too many attempts. Request a new code."}), 429
-
-    pending["attempts"] += 1
-
-    if pending["code"] != code:
-        return jsonify({"success": False, "error": "Incorrect code"}), 400
-
-    # Mark as verified (keep entry but flag it)
-    pending["verified"] = True
-    return jsonify({"success": True, "message": "Email verified"})
+def _is_allowed_email(email):
+    return any(email.endswith(f"@{d}") for d in ALLOWED_EMAIL_DOMAINS)
 
 
 @app.route("/api/auth/register", methods=["POST"])
@@ -338,22 +218,20 @@ def register():
         return jsonify({"success": False, "error": "Username must be at least 3 characters"}), 400
     if len(password) < 6:
         return jsonify({"success": False, "error": "Password must be at least 6 characters"}), 400
-    if not email.endswith(f"@{ALLOWED_EMAIL_DOMAIN}"):
-        return jsonify({"success": False, "error": f"Only @{ALLOWED_EMAIL_DOMAIN} emails are allowed"}), 400
-
-    # Check email was verified
-    pending = _pending_verifications.get(email)
-    if not pending or not pending.get("verified"):
-        return jsonify({"success": False, "error": "Email not verified. Please verify your email first."}), 400
+    if not email or not _is_allowed_email(email):
+        return jsonify({"success": False, "error": "Only @islander.tamucc.edu and @tamucc.edu emails are allowed"}), 400
 
     db = get_db()
     existing = db_fetchone(db, "SELECT 1 FROM users WHERE username = ?", (username,))
     if existing:
         return jsonify({"success": False, "error": "Username already exists"}), 409
 
-    existing_email = db_fetchone(db, "SELECT 1 FROM users WHERE email = ?", (email,))
-    if existing_email:
-        return jsonify({"success": False, "error": "This email is already registered"}), 409
+    try:
+        existing_email = db_fetchone(db, "SELECT 1 FROM users WHERE email = ?", (email,))
+        if existing_email:
+            return jsonify({"success": False, "error": "This email is already registered"}), 409
+    except Exception:
+        pass  # email column may not exist yet
 
     cursor = db_execute(db,
         "INSERT INTO users (username, email, password_hash, created_at) VALUES (?, ?, ?, ?)",
@@ -362,9 +240,6 @@ def register():
     if USE_POSTGRES:
         cursor.close()
     db.commit()
-
-    # Clean up verification entry
-    _pending_verifications.pop(email, None)
 
     return jsonify({"success": True, "username": username})
 

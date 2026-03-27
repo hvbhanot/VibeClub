@@ -11,7 +11,7 @@ import { problems } from '@/data/problems';
 import { Loader2 } from 'lucide-react';
 
 function App() {
-  const { currentUser, isLoading: authLoading, register, login, logout, sendVerification, verifyCode } = useAuth();
+  const { currentUser, isLoading: authLoading, register, login, logout } = useAuth();
   const [selectedProblem, setSelectedProblem] = useState<Problem | null>(null);
   const [userProgress, setUserProgress] = useState<UserProgress>({ username: '', problems: {} });
   const [isLoading, setIsLoading] = useState(true);
@@ -110,8 +110,6 @@ function App() {
               <LandingPage
                 onRegister={handleRegister}
                 onLogin={login}
-                onSendVerification={sendVerification}
-                onVerifyCode={verifyCode}
               />
             }
           />

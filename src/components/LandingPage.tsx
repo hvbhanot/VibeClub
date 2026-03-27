@@ -9,8 +9,6 @@ type AuthResult = { success: boolean; error?: string };
 interface LandingPageProps {
   onRegister: (username: string, password: string, email: string) => AuthResult | Promise<AuthResult>;
   onLogin: (username: string, password: string) => AuthResult | Promise<AuthResult>;
-  onSendVerification: (email: string) => Promise<AuthResult>;
-  onVerifyCode: (email: string, code: string) => Promise<AuthResult>;
 }
 
 const codeLines = [
@@ -23,7 +21,7 @@ const codeLines = [
   { num: 7, text: '    return total', color: 'text-white/80' },
 ];
 
-export function LandingPage({ onLogin, onRegister, onSendVerification, onVerifyCode }: LandingPageProps) {
+export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
   const navigate = useNavigate();
   const [showAuth, setShowAuth] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
@@ -64,8 +62,6 @@ export function LandingPage({ onLogin, onRegister, onSendVerification, onVerifyC
       <AuthForm
         onLogin={onLogin}
         onRegister={onRegister}
-        onSendVerification={onSendVerification}
-        onVerifyCode={onVerifyCode}
         initialMode={authMode}
         onSuccess={handleAuthSuccess}
       />

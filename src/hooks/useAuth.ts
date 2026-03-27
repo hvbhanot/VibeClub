@@ -16,34 +16,6 @@ export function useAuth() {
     setIsLoading(false);
   }, []);
 
-  const sendVerification = useCallback(async (email: string): Promise<{ success: boolean; error?: string }> => {
-    try {
-      const res = await fetch(`${API_BASE}/auth/send-verification`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-      const data = await res.json();
-      return { success: data.success, error: data.error };
-    } catch {
-      return { success: false, error: 'Cannot connect to server' };
-    }
-  }, []);
-
-  const verifyCode = useCallback(async (email: string, code: string): Promise<{ success: boolean; error?: string }> => {
-    try {
-      const res = await fetch(`${API_BASE}/auth/verify-code`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, code }),
-      });
-      const data = await res.json();
-      return { success: data.success, error: data.error };
-    } catch {
-      return { success: false, error: 'Cannot connect to server' };
-    }
-  }, []);
-
   const register = useCallback(async (username: string, password: string, email: string): Promise<{ success: boolean; error?: string }> => {
     try {
       const res = await fetch(`${API_BASE}/auth/register`, {
@@ -84,8 +56,6 @@ export function useAuth() {
   return {
     currentUser,
     isLoading,
-    sendVerification,
-    verifyCode,
     register,
     login,
     logout,
