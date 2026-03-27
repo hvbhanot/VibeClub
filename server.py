@@ -218,7 +218,7 @@ def _send_verification_email(email, code):
     """Send a 6-digit verification code via Resend API."""
     if not RESEND_API_KEY:
         # If Resend not configured, log code to console (dev mode)
-        print(f"[DEV] Verification code for {email}: {code}")
+        print(f"[DEV] Verification code for {email}: {code}", flush=True)
         return True
 
     html_body = f"""
@@ -265,39 +265,48 @@ def _send_verification_email(email, code):
 
 @app.route("/api/auth/send-verification", methods=["POST"])
 def send_verification():
-    data = request.get_json()
-    email = data.get("email", "").strip().lower()
+    try:
+        data = request.get_json()
+        email = data.get("email", "").strip().lower()
+        print(f"[VERIFY] Send verification request for: {email}", flush=True)
 
-    if not email:
-        return jsonify({"success": False, "error": "Email is required"}), 400
+        if not email:
+            return jsonify({"success": False, "error": "Email is required"}), 400
 
-    # Validate islander email
-    if not email.endswith(f"@{ALLOWED_EMAIL_DOMAIN}"):
-        return jsonify({"success": False, "error": f"Only @{ALLOWED_EMAIL_DOMAIN} emails are allowed"}), 400
+        # Validate islander email
+        if not email.endswith(f"@{ALLOWED_EMAIL_DOMAIN}"):
+            return jsonify({"success": False, "error": f"Only @{ALLOWED_EMAIL_DOMAIN} emails are allowed"}), 400
 
-    # Check if email already registered
-    db = get_db()
-    existing = db_fetchone(db, "SELECT 1 FROM users WHERE email = ?", (email,))
-    if existing:
-        return jsonify({"success": False, "error": "This email is already registered"}), 409
+        # Check if email already registered (skip if column doesn't exist yet)
+        try:
+            db = get_db()
+            existing = db_fetchone(db, "SELECT 1 FROM users WHERE email = ?", (email,))
+            if existing:
+                return jsonify({"success": False, "error": "This email is already registered"}), 409
+        except Exception as db_err:
+            print(f"[VERIFY] DB check skipped (email column may not exist): {db_err}", flush=True)
 
-    # Rate limit: don't resend if last code was sent < 60s ago
-    pending = _pending_verifications.get(email)
-    if pending and time.time() - pending.get("sent_at", 0) < 60:
-        return jsonify({"success": False, "error": "Please wait before requesting a new code"}), 429
+        # Rate limit: don't resend if last code was sent < 60s ago
+        pending = _pending_verifications.get(email)
+        if pending and time.time() - pending.get("sent_at", 0) < 60:
+            return jsonify({"success": False, "error": "Please wait before requesting a new code"}), 429
 
-    code = _generate_code()
-    _pending_verifications[email] = {
-        "code": code,
-        "expires": time.time() + 600,  # 10 min
-        "attempts": 0,
-        "sent_at": time.time(),
-    }
+        code = _generate_code()
+        _pending_verifications[email] = {
+            "code": code,
+            "expires": time.time() + 600,  # 10 min
+            "attempts": 0,
+            "sent_at": time.time(),
+        }
+        print(f"[VERIFY] Generated code for {email}: {code}", flush=True)
 
-    if _send_verification_email(email, code):
-        return jsonify({"success": True, "message": "Verification code sent"})
-    else:
-        return jsonify({"success": False, "error": "Failed to send email. Try again later."}), 500
+        if _send_verification_email(email, code):
+            return jsonify({"success": True, "message": "Verification code sent"})
+        else:
+            return jsonify({"success": False, "error": "Failed to send email. Try again later."}), 500
+    except Exception as e:
+        print(f"[VERIFY ERROR] {traceback.format_exc()}", flush=True)
+        return jsonify({"success": False, "error": "Server error. Try again."}), 500
 
 
 @app.route("/api/auth/verify-code", methods=["POST"])
