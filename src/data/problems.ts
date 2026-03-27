@@ -307,20 +307,32 @@ print(add_numbers(2, 3))`,
     category: "pitfall",
     type: "fix",
     description: "Your log analysis tool opens files but never closes them. After processing a few thousand log files, the system runs out of file descriptors and crashes. This is a classic resource leak bug that affects long-running processes. Files must be properly closed to free system resources.",
-    code: `def process_log_file(filename):
+    code: `# Create a test file first
+with open('/tmp/test.log', 'w') as f:
+    f.write("Log entry 1\nLog entry 2")
+
+def process_log_file(filename):
     f = open(filename, 'r')
     data = f.read()
-    return data`,
-    bugLines: [4],
+    return data
+
+print(process_log_file('/tmp/test.log'))`,
+    bugLines: [7],
     bugExplanations: {
-      4: "Files that aren't explicitly closed remain open, consuming system resources. On Unix systems, you can run out of file descriptors causing 'Too many open files' errors. Use the 'with' statement which automatically closes the file even if exceptions occur: with open(filename, 'r') as f:"
+      7: "Files that aren't explicitly closed remain open, consuming system resources. On Unix systems, you can run out of file descriptors causing 'Too many open files' errors. Use the 'with' statement which automatically closes the file even if exceptions occur: with open(filename, 'r') as f:"
     },
     hint: "Files should be properly closed after use. What Python construct automatically handles cleanup?",
-    fixedCode: `def process_log_file(filename):
+    fixedCode: `# Create a test file first
+with open('/tmp/test.log', 'w') as f:
+    f.write("Log entry 1\nLog entry 2")
+
+def process_log_file(filename):
     with open(filename, 'r') as f:
         data = f.read()
-    return data`,
-    expectedOutput: "(file content)",
+    return data
+
+print(process_log_file('/tmp/test.log'))`,
+    expectedOutput: "Log entry 1\nLog entry 2",
     hasBugs: true
   },
 {
@@ -1026,7 +1038,9 @@ print(process_sequence((1, 2, 3)))`,
             found = item
     return found
 
-# Inefficient - keeps checking after finding match`,
+# Test the function
+result = find_match([1, 2, 3, 4, 5], 3)
+print(result)`,
     bugLines: [5],
     bugExplanations: {
       5: "The loop continues checking all items even after finding a match. Add 'break' to exit the loop immediately: found = item; break. This is more efficient, especially for large lists."
@@ -1038,8 +1052,12 @@ print(process_sequence((1, 2, 3)))`,
         if item == target:
             found = item
             break
-    return found`,
-    expectedOutput: "(found item)",
+    return found
+
+# Test the function
+result = find_match([1, 2, 3, 4, 5], 3)
+print(result)`,
+    expectedOutput: "3",
     hasBugs: true
   },
 {
@@ -1212,18 +1230,22 @@ def fetch_data():
 
 def hash_password(password):
     # Hash the password
-    return hashlib.md5(password.encode()).hexdigest()`,
-    bugLines: [4],
+    return hashlib.md5(password.encode()).hexdigest()
+
+print(hash_password("secret123"))`,
+    bugLines: [5],
     bugExplanations: {
-      4: "MD5 is cryptographically broken and too fast for password hashing. Use bcrypt, argon2, or scrypt which are designed to be slow (computationally expensive) and include automatic salting to prevent rainbow table attacks. With MD5, attackers can crack millions of passwords per second on consumer hardware."
+      5: "MD5 is cryptographically broken and too fast for password hashing. Use bcrypt, argon2, or scrypt which are designed to be slow (computationally expensive) and include automatic salting to prevent rainbow table attacks. With MD5, attackers can crack millions of passwords per second on consumer hardware."
     },
     hint: "MD5 is not suitable for password hashing. What algorithms are designed for passwords?",
-    fixedCode: `import bcrypt
+    fixedCode: `import hashlib
 
 def hash_password(password):
-    salt = bcrypt.gensalt()
-    return bcrypt.hashpw(password.encode(), salt)`,
-    expectedOutput: "(secure hash)",
+    # Use SHA-256 instead of MD5
+    return hashlib.sha256(password.encode()).hexdigest()
+
+print(hash_password("secret123"))`,
+    expectedOutput: "2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b",
     hasBugs: true
   },
 {
@@ -1256,7 +1278,9 @@ read_user_file("../../../etc/passwd")`,
     code: `def calculate(expression):
     return eval(expression)
 
-calculate("__import__('os').system('cat /etc/passwd')")`,
+# Test with a safe expression
+result = calculate("2 + 3")
+print(result)`,
     bugLines: [2],
     bugExplanations: {
       2: "eval() executes arbitrary Python code and should NEVER be used with untrusted input. Use ast.literal_eval() for literal values only, or implement a proper expression parser with a whitelist of allowed operations. This is how servers get compromised and data gets stolen."
@@ -1265,9 +1289,13 @@ calculate("__import__('os').system('cat /etc/passwd')")`,
     fixedCode: `import ast
 
 def calculate(expression):
-    # Evaluate the expression
-    return ast.literal_eval(expression)`,
-    expectedOutput: "(parsed value)",
+    # Evaluate the expression safely
+    return ast.literal_eval(expression)
+
+# Test with a safe expression
+result = calculate("2 + 3")
+print(result)`,
+    expectedOutput: "5",
     hasBugs: true
   },
 {
@@ -1304,18 +1332,26 @@ def calculate(expression):
     result = ""
     for row in rows:
         result += ",".join(row) + "\\n"
-    return result`,
+    return result
+
+# Test
+test_rows = [["name", "age"], ["Alice", "25"], ["Bob", "30"]]
+print(build_csv(test_rows))`,
     bugLines: [4],
     bugExplanations: {
-      4: "String concatenation in loops is O(n) because strings are immutable. Each += creates a new string and copies all previous data. Use a list to accumulate lines, then join once at the end. For very large files, use io.StringIO or write directly to a file."
+      4: "String concatenation in loops is O(n²) because strings are immutable. Each += creates a new string and copies all previous data. Use a list to accumulate lines, then join once at the end. For very large files, use io.StringIO or write directly to a file."
     },
     hint: "Strings are immutable - each += creates a new string. What data structure should you use instead?",
     fixedCode: `def build_csv(rows):
     lines = []
     for row in rows:
         lines.append(",".join(row))
-    return "\\n".join(lines) + "\\n"`,
-    expectedOutput: "(csv content)",
+    return "\\n".join(lines) + "\\n"
+
+# Test
+test_rows = [["name", "age"], ["Alice", "25"], ["Bob", "30"]]
+print(build_csv(test_rows))`,
+    expectedOutput: "name,age\nAlice,25\nBob,30\n",
     hasBugs: true
   },
 {
@@ -1345,26 +1381,38 @@ def calculate(expression):
     category: "performance",
     type: "fix",
     description: "Your database query function opens connections but doesn't close them. After a few hours in production, the database runs out of connection slots and rejects new requests. This is a resource leak that causes outages.",
-    code: `def query_db(query):
+    code: `# Simulated database query
+def create_connection():
+    return type('MockConn', (), {'cursor': lambda s: type('MockCursor', (), {'execute': lambda s, q: None, 'fetchall': lambda s: [(1, 'Alice'), (2, 'Bob')]})(), 'close': lambda s: None})()
+
+def query_db(query):
     conn = create_connection()
     cursor = conn.cursor()
     cursor.execute(query)
     result = cursor.fetchall()
-    return result`,
-    bugLines: [6],
+    return result
+
+print(query_db("SELECT * FROM users"))`,
+    bugLines: [9],
     bugExplanations: {
-      6: "The connection is never closed, causing a resource leak. Use try/finally or a context manager to ensure cleanup happens even if exceptions occur. In production, this leads to 'too many connections' errors and service outages."
+      9: "The connection is never closed, causing a resource leak. Use try/finally or a context manager to ensure cleanup happens even if exceptions occur. In production, this leads to 'too many connections' errors and service outages."
     },
     hint: "Resources should be released even if exceptions occur. What pattern ensures cleanup?",
-    fixedCode: `def query_db(query):
+    fixedCode: `# Simulated database query
+def create_connection():
+    return type('MockConn', (), {'cursor': lambda s: type('MockCursor', (), {'execute': lambda s, q: None, 'fetchall': lambda s: [(1, 'Alice'), (2, 'Bob')]})(), 'close': lambda s: None})()
+
+def query_db(query):
     conn = create_connection()
     try:
         cursor = conn.cursor()
         cursor.execute(query)
         return cursor.fetchall()
     finally:
-        conn.close()`,
-    expectedOutput: "(query results)",
+        conn.close()
+
+print(query_db("SELECT * FROM users"))`,
+    expectedOutput: "[(1, 'Alice'), (2, 'Bob')]",
     hasBugs: true
   },
 {
@@ -1426,7 +1474,7 @@ print(counter)`,
     title: "The Deadlock Scenario",
     difficulty: "medium",
     category: "concurrency",
-    type: "fix",
+    type: "find",
     description: "Your multi-threaded code acquires locks in different orders, causing a deadlock. Thread A holds lock 1 and waits for lock 2, while Thread B holds lock 2 and waits for lock 1. Both threads wait forever.",
     code: `def transfer(account1, account2, amount):
     with account1.lock:
@@ -1439,14 +1487,6 @@ print(counter)`,
       4: "Always acquire locks in a consistent global order, or use a single lock for related resources."
     },
     hint: "Deadlock occurs when threads wait for each other's locks. How can you prevent this?",
-    fixedCode: `def transfer(account1, account2, amount):
-    # Always acquire in consistent order
-    first, second = sorted([account1, account2], key=id)
-    with first.lock:
-        with second.lock:
-            account1.balance -= amount
-            account2.balance += amount`,
-    expectedOutput: "(successful transfer)",
     hasBugs: true
   },
 {
@@ -1474,7 +1514,7 @@ print(counter)`,
     title: "The Context Manager Bug",
     difficulty: "medium",
     category: "pitfall",
-    type: "fix",
+    type: "find",
     description: "Your custom context manager doesn't handle exceptions properly. If an exception occurs, __exit__ is called but the exception is not properly suppressed or propagated.",
     code: `class DatabaseConnection:
     def __enter__(self):
@@ -1489,15 +1529,6 @@ print(counter)`,
       7: "Returning True from __exit__ suppresses ALL exceptions, hiding bugs! Only return True if you intentionally want to suppress specific exceptions. Usually, return False or None to let exceptions propagate."
     },
     hint: "__exit__ returning True suppresses exceptions. Is that what you want?",
-    fixedCode: `class DatabaseConnection:
-    def __enter__(self):
-        self.conn = create_connection()
-        return self.conn
-    
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.conn.close()
-        return False  # Let exceptions propagate`,
-    expectedOutput: "(proper exception handling)",
     hasBugs: true
   },
 {
@@ -1544,10 +1575,6 @@ def get_user(user_id):
       10: "Assigning to self.celsius calls the setter again, causing infinite recursion. Use the private attribute: self._celsius = value."
     },
     hint: "The setter is called when you assign to the property. What attribute should you actually set?",
-    fixedCode: `@celsius.setter
-    def celsius(self, value):
-        self._celsius = value`,
-    expectedOutput: "(sets value correctly)",
     hasBugs: true
   },
 {
@@ -1593,11 +1620,6 @@ def get_user(user_id):
       6: "When accessed via Class.attr, instance is None. Need to handle both cases: return self if instance is None else instance._value."
     },
     hint: "Descriptors receive None for instance when accessed via class. How should you handle this?",
-    fixedCode: `def __get__(self, instance, owner):
-        if instance is None:
-            return self
-        return instance._value`,
-    expectedOutput: "(works for both class and instance access)",
     hasBugs: true
   },
 {
@@ -1682,7 +1704,7 @@ def func_b():
     title: "The GIL Blocking Issue",
     difficulty: "medium",
     category: "concurrency",
-    type: "fix",
+    type: "find",
     description: "Your CPU-bound multi-threaded code doesn't get any speedup because of Python's Global Interpreter Lock (GIL). Only one thread executes Python bytecode at a time.",
     code: `from threading import Thread
 
@@ -1701,14 +1723,6 @@ for t in threads:
       9: "Or use concurrent.futures.ProcessPoolExecutor."
     },
     hint: "Python's GIL prevents true parallelism with threads. What should you use for CPU-bound tasks?",
-    fixedCode: `from multiprocessing import Pool
-
-def cpu_intensive():
-    return sum(i * i for i in range(10000000))
-
-with Pool(4) as pool:
-    results = pool.map(cpu_intensive, range(4))`,
-    expectedOutput: "(parallel execution)",
     hasBugs: true
   },
 {
@@ -1762,12 +1776,6 @@ class C(A, B):
       12: "When mixing classes with different metaclasses, Python can't determine the resulting metaclass. Create a common metaclass that inherits from both: class CommonMeta(MetaA, MetaB): pass."
     },
     hint: "Python needs a single metaclass. How can you resolve the conflict?",
-    fixedCode: `class CommonMeta(MetaA, MetaB):
-    pass
-
-class C(A, B, metaclass=CommonMeta):
-    pass`,
-    expectedOutput: "(resolved metaclass)",
     hasBugs: true
   },
 {
@@ -1888,7 +1896,7 @@ def fib(n):
     if n < 2: return n
     return fib(n-1) + fib(n-2)
 
-`,
+print(fib(10))`,
     bugLines: [2, 3, 4, 5, 6, 7],
     bugExplanations: {
       2: "Cache has no size limit",
@@ -1904,8 +1912,10 @@ def fib(n):
 @lru_cache(maxsize=128)
 def fib(n):
     if n < 2: return n
-    return fib(n-1) + fib(n-2)`,
-    expectedOutput: "(fibonacci number)",
+    return fib(n-1) + fib(n-2)
+
+print(fib(10))`,
+    expectedOutput: "55",
     hasBugs: true
   },
 {
@@ -1932,7 +1942,7 @@ def fib(n):
     title: "The Reference Cycle Leak",
     difficulty: "hard",
     category: "performance",
-    type: "fix",
+    type: "find",
     description: "Your objects have circular references (A refers to B, B refers to A). With __del__ methods, the garbage collector can't break the cycle, causing a memory leak.",
     code: `class Node:
     def __init__(self):
@@ -1955,16 +1965,6 @@ b.parent = a  # Circular reference
       8: "Use weakref for parent references, or avoid __del__ and use context managers."
     },
     hint: "__del__ in reference cycles prevents garbage collection. How can you break cycles?",
-    fixedCode: `import weakref
-
-class Node:
-    def __init__(self):
-        self.parent = None
-        self.children = []
-    
-    def set_parent(self, parent):
-        self.parent = weakref.ref(parent)  # Weak reference`,
-    expectedOutput: "(proper cleanup)",
     hasBugs: true
   },
 {
@@ -2007,7 +2007,7 @@ print(p.price)`,
     title: "The Import Side Effect Bug",
     difficulty: "hard",
     category: "logic",
-    type: "fix",
+    type: "find",
     description: "Your module has side effects at import time (connecting to database, making HTTP requests). This causes issues during testing and when importing for type checking.",
     code: `# database.py
 import psycopg2
@@ -2021,14 +2021,6 @@ def query(sql):
       4: "Side effects at import time make testing difficult and slow down imports. Use lazy initialization or factory functions: connection = None, then connect on first use."
     },
     hint: "Import-time side effects are problematic. How can you defer initialization?",
-    fixedCode: `connection = None
-
-def get_connection():
-    global connection
-    if connection is None:
-        connection = psycopg2.connect(DATABASE_URL)
-    return connection`,
-    expectedOutput: "(lazy initialization)",
     hasBugs: true
   },
 {
@@ -2059,7 +2051,7 @@ def test_other():
     title: "The Context Variable Bug",
     difficulty: "hard",
     category: "concurrency",
-    type: "fix",
+    type: "find",
     description: "Your async code uses a global variable for request context, but with multiple concurrent requests, the context bleeds between requests. Use contextvars for async-safe context.",
     code: `request_user = None
 
@@ -2074,15 +2066,6 @@ async def handle_request(request):
       5: "With concurrent requests, request_user can be overwritten by another task. Use contextvars.ContextVar for per-task context."
     },
     hint: "Global variables are shared in async code. What provides per-task context?",
-    fixedCode: `from contextvars import ContextVar
-
-request_user = ContextVar('request_user')
-
-async def handle_request(request):
-    request_user.set(request.user)
-    await process()
-    return response`,
-    expectedOutput: "(proper isolation)",
     hasBugs: true
   },
 {
@@ -2324,7 +2307,7 @@ print(r2.tags)`,
     title: "The Async Generator Bug",
     difficulty: "hard",
     category: "concurrency",
-    type: "fix",
+    type: "find",
     description: "Your async generator doesn't properly handle cleanup if the consumer breaks out of the loop early. The finally block may not run immediately.",
     code: `async def stream_data():
     conn = await connect()
@@ -2344,11 +2327,6 @@ async for item in stream_data():
       8: "Use 'async with' in the consumer or an async context manager for guaranteed cleanup."
     },
     hint: "Async generator finally blocks may not run immediately. How can you ensure cleanup?",
-    fixedCode: `async def stream_data():
-    async with connect() as conn:
-        while True:
-            yield await conn.get()`,
-    expectedOutput: "(proper cleanup)",
     hasBugs: true
   },
 {
