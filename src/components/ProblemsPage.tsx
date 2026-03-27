@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -102,8 +103,17 @@ export function ProblemsPage({ userProgress, onSelectProblem }: ProblemsPageProp
   const [categoryFilter, setCategoryFilter] = useState<Category | 'all'>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'solved' | 'unsolved'>('all');
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
   const categoryBtnRef = useRef<HTMLButtonElement>(null);
   const isLoggedIn = userProgress.username !== '';
+
+  const openCategoryDropdown = () => {
+    if (categoryBtnRef.current) {
+      const rect = categoryBtnRef.current.getBoundingClientRect();
+      setDropdownPos({ top: rect.bottom + 4, left: rect.left });
+    }
+    setShowCategoryDropdown(prev => !prev);
+  };
 
   useEffect(() => {
     setShuffledProblems(shuffleArray(allProblems));
@@ -305,50 +315,19 @@ export function ProblemsPage({ userProgress, onSelectProblem }: ProblemsPageProp
               <div className="w-px h-7 bg-white/10 hidden md:block" />
 
               {/* Category Dropdown */}
-              <div className="relative">
-                <button
-                  ref={categoryBtnRef}
-                  onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
-                    categoryFilter !== 'all'
-                      ? getCategoryColor(categoryFilter) + ' border-current/20'
-                      : 'text-gray-500 border-transparent hover:text-gray-300 hover:bg-white/5'
-                  }`}
-                >
-                  <Filter className="w-3 h-3" />
-                  {categoryFilter !== 'all' ? getCategoryLabel(categoryFilter) : 'Category'}
-                  <ChevronDown className="w-3 h-3" />
-                </button>
-              </div>
-              {showCategoryDropdown && (
-                <>
-                  <div className="fixed inset-0 z-[9998]" onClick={() => setShowCategoryDropdown(false)} />
-                  <div
-                    className="fixed z-[9999] w-48 rounded-lg border border-white/10 py-1 shadow-2xl bg-[#141420] max-h-[400px] overflow-y-auto"
-                    style={{
-                      top: categoryBtnRef.current ? categoryBtnRef.current.getBoundingClientRect().bottom + 4 : 0,
-                      left: categoryBtnRef.current ? categoryBtnRef.current.getBoundingClientRect().left : 0,
-                    }}
-                  >
-                    <button
-                      onClick={() => { setCategoryFilter('all'); setShowCategoryDropdown(false); }}
-                      className={`w-full text-left px-3 py-2 text-xs hover:bg-white/5 transition-colors ${categoryFilter === 'all' ? 'text-white' : 'text-gray-400'}`}
-                    >
-                      All Categories
-                    </button>
-                    {allCategories.map(cat => (
-                      <button
-                        key={cat}
-                        onClick={() => { setCategoryFilter(cat); setShowCategoryDropdown(false); }}
-                        className={`w-full text-left px-3 py-2 text-xs hover:bg-white/5 transition-colors flex items-center gap-2 ${categoryFilter === cat ? 'text-white' : 'text-gray-400'}`}
-                      >
-                        {getCategoryIcon(cat)}
-                        {getCategoryLabel(cat)}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
+              <button
+                ref={categoryBtnRef}
+                onClick={openCategoryDropdown}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                  categoryFilter !== 'all'
+                    ? getCategoryColor(categoryFilter) + ' border-current/20'
+                    : 'text-gray-500 border-transparent hover:text-gray-300 hover:bg-white/5'
+                }`}
+              >
+                <Filter className="w-3 h-3" />
+                {categoryFilter !== 'all' ? getCategoryLabel(categoryFilter) : 'Category'}
+                <ChevronDown className="w-3 h-3" />
+              </button>
 
               {/* Status Filter */}
               {isLoggedIn && (
@@ -538,6 +517,35 @@ export function ProblemsPage({ userProgress, onSelectProblem }: ProblemsPageProp
             </div>
           </div>
         </div>
+      )}
+
+      {/* Category Dropdown Portal */}
+      {showCategoryDropdown && createPortal(
+        <>
+          <div className="fixed inset-0" style={{ zIndex: 9998 }} onClick={() => setShowCategoryDropdown(false)} />
+          <div
+            className="fixed w-48 rounded-lg border border-white/10 py-1 shadow-2xl bg-[#141420] max-h-[400px] overflow-y-auto"
+            style={{ zIndex: 9999, top: dropdownPos.top, left: dropdownPos.left }}
+          >
+            <button
+              onClick={() => { setCategoryFilter('all'); setShowCategoryDropdown(false); }}
+              className={`w-full text-left px-3 py-2 text-xs hover:bg-white/10 transition-colors ${categoryFilter === 'all' ? 'text-white' : 'text-gray-400'}`}
+            >
+              All Categories
+            </button>
+            {allCategories.map(cat => (
+              <button
+                key={cat}
+                onClick={() => { setCategoryFilter(cat); setShowCategoryDropdown(false); }}
+                className={`w-full text-left px-3 py-2 text-xs hover:bg-white/10 transition-colors flex items-center gap-2 ${categoryFilter === cat ? 'text-white' : 'text-gray-400'}`}
+              >
+                {getCategoryIcon(cat)}
+                {getCategoryLabel(cat)}
+              </button>
+            ))}
+          </div>
+        </>,
+        document.body
       )}
     </div>
   );
