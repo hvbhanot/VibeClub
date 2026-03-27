@@ -8,8 +8,9 @@ import builtins
 import hashlib as _hashlib
 import random
 import string
-import urllib.request
-import urllib.error
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 # Import standard library modules used in problems
 import math
@@ -60,10 +61,11 @@ app = Flask(__name__, static_folder=None)
 CORS(app)
 
 # ---------------------------------------------------------------------------
-# Email verification config (Resend)
+# Email verification config (Brevo SMTP)
 # ---------------------------------------------------------------------------
-RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
-RESEND_FROM = os.environ.get('RESEND_FROM', 'VibeClub <onboarding@resend.dev>')
+BREVO_SMTP_KEY = os.environ.get('BREVO_SMTP_KEY', '')
+BREVO_SMTP_LOGIN = os.environ.get('BREVO_SMTP_LOGIN', '')
+BREVO_FROM = os.environ.get('BREVO_FROM', BREVO_SMTP_LOGIN)
 ALLOWED_EMAIL_DOMAIN = 'islander.tamucc.edu'
 
 # In-memory store for pending verifications: {email: {code, expires, attempts}}
@@ -215,51 +217,39 @@ def _generate_code():
 
 
 def _send_verification_email(email, code):
-    """Send a 6-digit verification code via Resend API."""
-    if not RESEND_API_KEY:
-        # If Resend not configured, log code to console (dev mode)
+    """Send a 6-digit verification code via Brevo SMTP."""
+    if not BREVO_SMTP_KEY or not BREVO_SMTP_LOGIN:
+        # If Brevo not configured, log code to console (dev mode)
         print(f"[DEV] Verification code for {email}: {code}", flush=True)
         return True
 
-    html_body = f"""
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; padding: 32px;">
-        <h2 style="color: #a855f7; margin-bottom: 8px;">VibeClub</h2>
-        <p style="color: #666; margin-bottom: 24px;">Verify your Islander email to create your account.</p>
-        <div style="background: #1a1a2e; border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 24px;">
-            <p style="color: #999; margin: 0 0 8px 0; font-size: 14px;">Your verification code</p>
-            <p style="color: #fff; font-size: 32px; font-weight: bold; letter-spacing: 8px; margin: 0;">{code}</p>
-        </div>
-        <p style="color: #999; font-size: 13px;">This code expires in 10 minutes. If you didn't request this, ignore this email.</p>
+    msg = MIMEMultipart("alternative")
+    msg["From"] = BREVO_FROM
+    msg["To"] = email
+    msg["Subject"] = "VibeClub - Verify Your Islander Email"
+
+    html_body = f"""\
+<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; padding: 32px;">
+    <h2 style="color: #a855f7; margin-bottom: 8px;">VibeClub</h2>
+    <p style="color: #666; margin-bottom: 24px;">Verify your Islander email to create your account.</p>
+    <div style="background: #1a1a2e; border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 24px;">
+        <p style="color: #999; margin: 0 0 8px 0; font-size: 14px;">Your verification code</p>
+        <p style="color: #fff; font-size: 32px; font-weight: bold; letter-spacing: 8px; margin: 0;">{code}</p>
     </div>
-    """
-
-    payload = json_module.dumps({
-        "from": RESEND_FROM,
-        "to": [email],
-        "subject": "VibeClub - Verify Your Islander Email",
-        "html": html_body,
-    }).encode("utf-8")
-
-    req = urllib.request.Request(
-        "https://api.resend.com/emails",
-        data=payload,
-        headers={
-            "Authorization": f"Bearer {RESEND_API_KEY}",
-            "Content-Type": "application/json",
-        },
-        method="POST",
-    )
+    <p style="color: #999; font-size: 13px;">This code expires in 10 minutes. If you didn't request this, ignore this email.</p>
+</div>"""
+    msg.attach(MIMEText(html_body, "html"))
 
     try:
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            print(f"[RESEND] Sent verification to {email}, status {resp.status}")
-            return True
-    except urllib.error.HTTPError as e:
-        body = e.read().decode("utf-8", errors="replace")
-        print(f"[RESEND ERROR] {e.code}: {body}")
-        return False
+        server = smtplib.SMTP("smtp-relay.brevo.com", 587)
+        server.starttls()
+        server.login(BREVO_SMTP_LOGIN, BREVO_SMTP_KEY)
+        server.sendmail(BREVO_FROM, email, msg.as_string())
+        server.quit()
+        print(f"[BREVO] Sent verification to {email}", flush=True)
+        return True
     except Exception as e:
-        print(f"[RESEND ERROR] {e}")
+        print(f"[BREVO ERROR] {e}", flush=True)
         return False
 
 
