@@ -356,7 +356,6 @@ export function ProblemSolver({
   const highlightPython = (line: string) => {
     const tokens: { text: string; className: string }[] = [];
     let remaining = line;
-    let i = 0;
 
     const keywords = /^(def|class|return|if|elif|else|for|while|in|not|and|or|is|import|from|as|try|except|finally|raise|with|yield|lambda|pass|break|continue|global|nonlocal|assert|del|True|False|None)\b/;
     const builtins = /^(print|len|str|int|float|list|dict|set|tuple|range|sorted|enumerate|zip|map|filter|type|isinstance|hasattr|getattr|setattr|super|property|staticmethod|classmethod|abs|sum|min|max|round|pow|any|all|reversed|next|iter|open|input|repr|id|hash|callable|bool|bytes|frozenset|complex|hex|oct|bin|chr|ord|format|vars|dir)\b/;

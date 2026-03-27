@@ -6,7 +6,7 @@ import { ProblemsPage } from '@/components/ProblemsPage';
 import { TipsPage } from '@/components/TipsPage';
 import { ProblemSolver } from '@/components/ProblemSolver';
 import { useAuth, getUserProgress, saveUserProgress } from '@/hooks/useAuth';
-import type { Problem, UserProgress, ProblemProgress } from '@/types';
+import type { Problem, UserProgress } from '@/types';
 import { problems } from '@/data/problems';
 import { Loader2 } from 'lucide-react';
 
