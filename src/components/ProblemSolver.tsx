@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { AlertDescription } from '@/components/ui/alert';
-import Editor, { useMonaco } from '@monaco-editor/react';
+import Editor from '@monaco-editor/react';
+import type { Monaco } from '@monaco-editor/react';
 import { 
   ArrowLeft, 
   Lightbulb, 
@@ -99,13 +100,9 @@ export function ProblemSolver({
   const [terminalError, setTerminalError] = useState<string | null>(null);
   const [lastExecutionResult, setLastExecutionResult] = useState<{ output: string[]; error?: string } | null>(null);
 
-  const monaco = useMonaco();
-
-  useEffect(() => {
-    if (monaco) {
-      monaco.editor.defineTheme('one-dark', oneDarkTheme);
-    }
-  }, [monaco]);
+  const handleEditorWillMount = (monaco: Monaco) => {
+    monaco.editor.defineTheme('one-dark', oneDarkTheme);
+  };
 
   useEffect(() => {
     setSelectedLines([]);
@@ -799,7 +796,7 @@ export function ProblemSolver({
                 {renderCodeLines()}
               </div>
             ) : (
-              <div className="h-full rounded-xl overflow-hidden border border-purple-500/20">
+              <div className="h-full rounded-xl overflow-hidden border border-purple-500/20" style={{ backgroundColor: '#282C34' }}>
                 <Editor
                   key={`editor-${problem.id}`}
                   height="100%"
@@ -807,6 +804,8 @@ export function ProblemSolver({
                   value={fixedCode}
                   onChange={(value) => setFixedCode(value || '')}
                   theme="one-dark"
+                  beforeMount={handleEditorWillMount}
+                  loading={<div style={{ backgroundColor: '#282C34', height: '100%' }} />}
                   options={{
                     minimap: { enabled: false },
                     fontSize: 14,
