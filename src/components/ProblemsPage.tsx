@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -102,6 +102,7 @@ export function ProblemsPage({ userProgress, onSelectProblem }: ProblemsPageProp
   const [categoryFilter, setCategoryFilter] = useState<Category | 'all'>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'solved' | 'unsolved'>('all');
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const categoryBtnRef = useRef<HTMLButtonElement>(null);
   const isLoggedIn = userProgress.username !== '';
 
   useEffect(() => {
@@ -306,6 +307,7 @@ export function ProblemsPage({ userProgress, onSelectProblem }: ProblemsPageProp
               {/* Category Dropdown */}
               <div className="relative">
                 <button
+                  ref={categoryBtnRef}
                   onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                     categoryFilter !== 'all'
@@ -317,30 +319,36 @@ export function ProblemsPage({ userProgress, onSelectProblem }: ProblemsPageProp
                   {categoryFilter !== 'all' ? getCategoryLabel(categoryFilter) : 'Category'}
                   <ChevronDown className="w-3 h-3" />
                 </button>
-                {showCategoryDropdown && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setShowCategoryDropdown(false)} />
-                    <div className="absolute top-full mt-1 left-0 z-50 w-48 rounded-lg border border-white/10 py-1 shadow-2xl bg-[#141420] max-h-[400px] overflow-y-auto">
-                      <button
-                        onClick={() => { setCategoryFilter('all'); setShowCategoryDropdown(false); }}
-                        className={`w-full text-left px-3 py-2 text-xs hover:bg-white/5 transition-colors ${categoryFilter === 'all' ? 'text-white' : 'text-gray-400'}`}
-                      >
-                        All Categories
-                      </button>
-                      {allCategories.map(cat => (
-                        <button
-                          key={cat}
-                          onClick={() => { setCategoryFilter(cat); setShowCategoryDropdown(false); }}
-                          className={`w-full text-left px-3 py-2 text-xs hover:bg-white/5 transition-colors flex items-center gap-2 ${categoryFilter === cat ? 'text-white' : 'text-gray-400'}`}
-                        >
-                          {getCategoryIcon(cat)}
-                          {getCategoryLabel(cat)}
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                )}
               </div>
+              {showCategoryDropdown && (
+                <>
+                  <div className="fixed inset-0 z-[9998]" onClick={() => setShowCategoryDropdown(false)} />
+                  <div
+                    className="fixed z-[9999] w-48 rounded-lg border border-white/10 py-1 shadow-2xl bg-[#141420] max-h-[400px] overflow-y-auto"
+                    style={{
+                      top: categoryBtnRef.current ? categoryBtnRef.current.getBoundingClientRect().bottom + 4 : 0,
+                      left: categoryBtnRef.current ? categoryBtnRef.current.getBoundingClientRect().left : 0,
+                    }}
+                  >
+                    <button
+                      onClick={() => { setCategoryFilter('all'); setShowCategoryDropdown(false); }}
+                      className={`w-full text-left px-3 py-2 text-xs hover:bg-white/5 transition-colors ${categoryFilter === 'all' ? 'text-white' : 'text-gray-400'}`}
+                    >
+                      All Categories
+                    </button>
+                    {allCategories.map(cat => (
+                      <button
+                        key={cat}
+                        onClick={() => { setCategoryFilter(cat); setShowCategoryDropdown(false); }}
+                        className={`w-full text-left px-3 py-2 text-xs hover:bg-white/5 transition-colors flex items-center gap-2 ${categoryFilter === cat ? 'text-white' : 'text-gray-400'}`}
+                      >
+                        {getCategoryIcon(cat)}
+                        {getCategoryLabel(cat)}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
 
               {/* Status Filter */}
               {isLoggedIn && (
