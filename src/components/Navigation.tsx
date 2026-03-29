@@ -13,59 +13,42 @@ interface NavigationProps {
 
 export function Navigation({ currentUser, totalPoints, currentStreak, dailyProblemId, onLogout, onSelectDaily }: NavigationProps) {
   const location = useLocation();
-
   const isActive = (path: string) => location.pathname === path;
 
-  const handleLogout = () => {
-    onLogout();
-    window.location.href = '/';
-  };
+  const handleLogout = () => { onLogout(); window.location.href = '/'; };
 
   return (
-    <header className="sticky top-0 z-50 bg-[#09090B]/95 backdrop-blur-sm border-b border-[#1C1C1F]">
-      <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
+    <header className="sticky top-0 z-50 bg-[#0A0C10]/90 backdrop-blur-md border-b border-white/[0.06]">
+      <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link to="/problems" className="flex items-center gap-2.5">
-          <span className="font-mono text-sm font-bold text-[#22C55E]">&lt;v/&gt;</span>
-          <span className="text-sm font-semibold text-[#E4E4E7] tracking-tight">vibeclub</span>
+          <span className="font-mono text-base font-bold text-[#4ADE80]">&lt;v/&gt;</span>
+          <span className="text-[15px] font-semibold text-white/90 tracking-tight">vibeclub</span>
         </Link>
 
-        {/* Navigation */}
-        <nav className="flex items-center gap-1">
-          <Link
-            to="/problems"
-            className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
-              isActive('/problems') || isActive('/')
-                ? 'text-[#E4E4E7] bg-[#1C1C1F]'
-                : 'text-[#A1A1AA] hover:text-[#E4E4E7] hover:bg-white/5'
-            }`}
-          >
-            Problems
-          </Link>
-          <Link
-            to="/leaderboard"
-            className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
-              isActive('/leaderboard')
-                ? 'text-[#E4E4E7] bg-[#1C1C1F]'
-                : 'text-[#A1A1AA] hover:text-[#E4E4E7] hover:bg-white/5'
-            }`}
-          >
-            Leaderboard
-          </Link>
-          <Link
-            to="/tips"
-            className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
-              isActive('/tips')
-                ? 'text-[#E4E4E7] bg-[#1C1C1F]'
-                : 'text-[#A1A1AA] hover:text-[#E4E4E7] hover:bg-white/5'
-            }`}
-          >
-            Tips
-          </Link>
+        {/* Nav */}
+        <nav className="flex items-center gap-0.5 bg-white/[0.03] rounded-xl p-1 border border-white/[0.04]">
+          {[
+            { path: '/problems', label: 'Problems', match: ['/problems', '/'] },
+            { path: '/leaderboard', label: 'Leaderboard', match: ['/leaderboard'] },
+            { path: '/tips', label: 'Tips', match: ['/tips'] },
+          ].map(item => (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={`px-4 py-1.5 rounded-lg text-[13px] font-medium transition-all ${
+                item.match.some(m => isActive(m))
+                  ? 'bg-white/[0.08] text-white'
+                  : 'text-white/40 hover:text-white/70'
+              }`}
+            >
+              {item.label}
+            </Link>
+          ))}
           {dailyProblemId && (
             <button
               onClick={onSelectDaily}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-[#FBBF24] hover:bg-[#FBBF24]/10 transition-colors"
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[13px] font-medium text-[#FBBF24] hover:bg-[#FBBF24]/10 transition-all"
             >
               <Zap className="w-3.5 h-3.5" />
               Daily
@@ -73,27 +56,21 @@ export function Navigation({ currentUser, totalPoints, currentStreak, dailyProbl
           )}
         </nav>
 
-        {/* User */}
+        {/* Right */}
         <div className="flex items-center gap-3">
           {currentStreak > 0 && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#F97316]/8 border border-[#F97316]/15">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F97316]/[0.08] border border-[#F97316]/[0.12]">
               <Flame className="w-3.5 h-3.5 text-[#F97316]" />
-              <span className="text-xs font-mono font-semibold text-[#F97316]">{currentStreak}</span>
+              <span className="text-[13px] font-mono font-bold text-[#F97316]">{currentStreak}</span>
             </div>
           )}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#22C55E]/8 border border-[#22C55E]/15">
-            <span className="text-xs font-mono font-semibold text-[#22C55E]">{totalPoints}</span>
-            <span className="text-xs text-[#52525B]">pts</span>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#4ADE80]/[0.08] border border-[#4ADE80]/[0.12]">
+            <span className="text-[13px] font-mono font-bold text-[#4ADE80]">{totalPoints}</span>
+            <span className="text-[12px] text-white/25">pts</span>
           </div>
-          <div className="w-px h-4 bg-[#27272A]" />
-          <span className="text-sm text-[#A1A1AA]">{currentUser}</span>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleLogout}
-            className="text-[#71717A] hover:text-[#E4E4E7] hover:bg-white/5 h-8 w-8"
-          >
-            <LogOut className="w-3.5 h-3.5" />
+          <span className="text-[14px] text-white/50">{currentUser}</span>
+          <Button variant="ghost" size="icon" onClick={handleLogout} className="text-white/30 hover:text-white hover:bg-white/[0.06] h-9 w-9 rounded-lg">
+            <LogOut className="w-4 h-4" />
           </Button>
         </div>
       </div>

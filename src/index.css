@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,25 +6,25 @@
 
 @layer base {
   :root {
-    --background: 0 0% 4%;
-    --foreground: 0 0% 93%;
-    --card: 0 0% 7%;
-    --card-foreground: 0 0% 93%;
-    --popover: 0 0% 7%;
-    --popover-foreground: 0 0% 93%;
-    --primary: 145 80% 42%;
+    --background: 220 15% 5%;
+    --foreground: 210 20% 95%;
+    --card: 220 15% 9%;
+    --card-foreground: 210 20% 95%;
+    --popover: 220 15% 9%;
+    --popover-foreground: 210 20% 95%;
+    --primary: 142 71% 45%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 0 0% 93%;
-    --muted: 0 0% 12%;
-    --muted-foreground: 0 0% 50%;
-    --accent: 145 80% 42%;
+    --secondary: 220 15% 14%;
+    --secondary-foreground: 210 20% 95%;
+    --muted: 220 15% 14%;
+    --muted-foreground: 215 15% 55%;
+    --accent: 142 71% 45%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 13%;
-    --input: 0 0% 13%;
-    --ring: 145 80% 42%;
+    --border: 220 15% 14%;
+    --input: 220 15% 14%;
+    --ring: 142 71% 45%;
     --radius: 0.5rem;
   }
 }
@@ -35,87 +35,65 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Space Grotesk', -apple-system, sans-serif;
-    background: #09090B;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #0A0C10;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.01em;
   }
   code, pre, .font-mono {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
   }
 }
 
 /* Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #27272A;
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #3F3F46;
-}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.14); }
 
-/* Cards */
+/* Cards with subtle depth */
 .glass-card {
-  background: #111113;
-  border: 1px solid #1C1C1F;
+  background: #12141A;
+  border: 1px solid rgba(255,255,255,0.06);
 }
 .glass-card:hover {
-  border-color: #27272A;
+  border-color: rgba(255,255,255,0.1);
 }
 
 /* Code blocks */
 .code-block {
-  background: #0C0C0E;
-  border: 1px solid #1C1C1F;
-  border-radius: 8px;
+  background: #0D0F14;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
 }
 
 /* Difficulty badges */
 .badge-easy {
-  background: rgba(34, 197, 94, 0.08);
-  border: 1px solid rgba(34, 197, 94, 0.2);
+  background: rgba(74, 222, 128, 0.1);
+  border: 1px solid rgba(74, 222, 128, 0.2);
   color: #4ADE80;
 }
 .badge-medium {
-  background: rgba(251, 191, 36, 0.08);
+  background: rgba(251, 191, 36, 0.1);
   border: 1px solid rgba(251, 191, 36, 0.2);
   color: #FBBF24;
 }
 .badge-hard {
-  background: rgba(248, 113, 113, 0.08);
+  background: rgba(248, 113, 113, 0.1);
   border: 1px solid rgba(248, 113, 113, 0.2);
   color: #F87171;
 }
 
 /* Selection */
 ::selection {
-  background: rgba(34, 197, 94, 0.25);
+  background: rgba(74, 222, 128, 0.25);
   color: white;
 }
 
-/* Terminal cursor blink */
+/* Cursor blink */
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
 }
-.cursor-blink {
-  animation: blink 1s step-end infinite;
-}
-
-/* Subtle scan line effect for hero */
-@keyframes scanline {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(100vh); }
-}
-
-/* Accent green glow — used sparingly */
-.accent-glow {
-  box-shadow: 0 0 20px rgba(34, 197, 94, 0.15), 0 0 60px rgba(34, 197, 94, 0.05);
-}
+.cursor-blink { animation: blink 1s step-end infinite; }

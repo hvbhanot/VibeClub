@@ -73,7 +73,7 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-[#09090B] text-[#E4E4E7]">
+    <div className="min-h-screen bg-[#0A0C10] text-[#E4E4E7]">
       {/* Nav */}
       <nav className="flex items-center justify-between px-6 md:px-12 py-5 max-w-7xl mx-auto">
         <div className="flex items-center gap-2.5">
@@ -87,7 +87,7 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
           <Button onClick={() => navigate('/tips')} variant="ghost" className="text-[#A1A1AA] hover:text-white hover:bg-white/5 text-sm hidden sm:inline-flex">
             Tips
           </Button>
-          <div className="w-px h-5 bg-[#27272A] mx-1 hidden sm:block" />
+          <div className="w-px h-5 bg-[rgba(255,255,255,0.1)] mx-1 hidden sm:block" />
           <Button onClick={handleLoginClick} variant="ghost" className="text-[#A1A1AA] hover:text-white hover:bg-white/5 text-sm">
             Log in
           </Button>
@@ -122,7 +122,7 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
                 Start training — free
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
-              <Button onClick={() => navigate('/problems')} variant="ghost" className="text-[#A1A1AA] hover:text-white text-sm h-11 border border-[#27272A] hover:border-[#3F3F46] hover:bg-white/5 rounded-lg">
+              <Button onClick={() => navigate('/problems')} variant="ghost" className="text-[#A1A1AA] hover:text-white text-sm h-11 border border-[rgba(255,255,255,0.1)] hover:border-[#3F3F46] hover:bg-white/5 rounded-lg">
                 Browse problems
               </Button>
             </div>
@@ -133,12 +133,12 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
                 <span className="text-2xl font-bold font-mono text-white">{totalProblems}</span>
                 <span className="text-sm text-[#71717A]">problems</span>
               </div>
-              <div className="w-px h-6 bg-[#27272A]" />
+              <div className="w-px h-6 bg-[rgba(255,255,255,0.1)]" />
               <div className="flex items-center gap-2">
                 <span className="text-2xl font-bold font-mono text-white">3</span>
                 <span className="text-sm text-[#71717A]">modes</span>
               </div>
-              <div className="w-px h-6 bg-[#27272A]" />
+              <div className="w-px h-6 bg-[rgba(255,255,255,0.1)]" />
               <div className="flex items-center gap-2">
                 <span className="text-2xl font-bold font-mono text-white">12</span>
                 <span className="text-sm text-[#71717A]">categories</span>
@@ -149,8 +149,8 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
           {/* Right — interactive terminal */}
           <div className="space-y-3">
             {/* Code editor pane */}
-            <div className="rounded-xl border border-[#1C1C1F] overflow-hidden bg-[#0C0C0E]">
-              <div className="flex items-center gap-2 px-4 py-2.5 border-b border-[#1C1C1F] bg-[#111113]">
+            <div className="rounded-xl border border-[rgba(255,255,255,0.06)] overflow-hidden bg-[#0D0F14]">
+              <div className="flex items-center gap-2 px-4 py-2.5 border-b border-[rgba(255,255,255,0.06)] bg-[#12141A]">
                 <div className="flex gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-[#F87171]/80" />
                   <div className="w-3 h-3 rounded-full bg-[#FBBF24]/80" />
@@ -180,8 +180,8 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
             </div>
 
             {/* Terminal output pane */}
-            <div className="rounded-xl border border-[#1C1C1F] overflow-hidden bg-[#0C0C0E]">
-              <div className="flex items-center gap-2 px-4 py-2.5 border-b border-[#1C1C1F] bg-[#111113]">
+            <div className="rounded-xl border border-[rgba(255,255,255,0.06)] overflow-hidden bg-[#0D0F14]">
+              <div className="flex items-center gap-2 px-4 py-2.5 border-b border-[rgba(255,255,255,0.06)] bg-[#12141A]">
                 <Terminal className="w-3.5 h-3.5 text-[#22C55E]" />
                 <span className="text-xs text-[#52525B] font-mono">terminal</span>
               </div>
@@ -208,7 +208,7 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
       </section>
 
       {/* How it works — 3 modes */}
-      <section className="border-t border-[#1C1C1F]">
+      <section className="border-t border-[rgba(255,255,255,0.06)]">
         <div className="max-w-7xl mx-auto px-6 md:px-12 py-24">
           <div className="max-w-2xl mb-14">
             <h2 className="text-3xl font-bold tracking-tight mb-3">How it works</h2>
@@ -245,7 +245,7 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
                 color: '#FBBF24',
               },
             ].map((mode) => (
-              <div key={mode.title} className="rounded-xl border border-[#1C1C1F] p-6 bg-[#0C0C0E] hover:border-[#27272A] transition-colors group">
+              <div key={mode.title} className="rounded-xl border border-[rgba(255,255,255,0.06)] p-6 bg-[#0D0F14] hover:border-[rgba(255,255,255,0.1)] transition-colors group">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: `${mode.color}10`, border: `1px solid ${mode.color}25` }}>
                     <mode.icon className="w-4 h-4" style={{ color: mode.color }} />
@@ -264,7 +264,7 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
       </section>
 
       {/* Problem breakdown */}
-      <section className="border-t border-[#1C1C1F]">
+      <section className="border-t border-[rgba(255,255,255,0.06)]">
         <div className="max-w-7xl mx-auto px-6 md:px-12 py-24">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div>
@@ -284,7 +284,7 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
                   { icon: Code2, label: 'Syntax traps', count: 'Python gotchas' },
                   { icon: RefreshCw, label: 'Async bugs', count: 'Concurrency' },
                 ].map((cat) => (
-                  <div key={cat.label} className="flex items-center gap-3 p-3 rounded-lg border border-[#1C1C1F] bg-[#0C0C0E]">
+                  <div key={cat.label} className="flex items-center gap-3 p-3 rounded-lg border border-[rgba(255,255,255,0.06)] bg-[#0D0F14]">
                     <cat.icon className="w-4 h-4 text-[#22C55E]" />
                     <div>
                       <div className="text-sm font-medium">{cat.label}</div>
@@ -296,7 +296,7 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
             </div>
 
             {/* Difficulty breakdown */}
-            <div className="rounded-xl border border-[#1C1C1F] bg-[#0C0C0E] p-8">
+            <div className="rounded-xl border border-[rgba(255,255,255,0.06)] bg-[#0D0F14] p-8">
               <h3 className="text-lg font-semibold mb-6">Difficulty breakdown</h3>
               <div className="space-y-5">
                 {[
@@ -315,13 +315,13 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
                         <span className="text-sm font-mono font-semibold" style={{ color: d.color }}>{d.count}</span>
                       </div>
                     </div>
-                    <div className="h-1.5 bg-[#1C1C1F] rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-[rgba(255,255,255,0.06)] rounded-full overflow-hidden">
                       <div className="h-full rounded-full transition-all duration-700" style={{ background: d.color, width: `${(d.count / totalProblems) * 100}%`, opacity: 0.7 }} />
                     </div>
                   </div>
                 ))}
               </div>
-              <div className="mt-6 pt-6 border-t border-[#1C1C1F] flex items-center justify-between">
+              <div className="mt-6 pt-6 border-t border-[rgba(255,255,255,0.06)] flex items-center justify-between">
                 <span className="text-sm text-[#71717A]">Total points available</span>
                 <span className="text-lg font-bold font-mono text-[#22C55E]">
                   {easyCount * 10 + mediumCount * 20 + hardCount * 30}
@@ -333,7 +333,7 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
       </section>
 
       {/* Scoring system */}
-      <section className="border-t border-[#1C1C1F]">
+      <section className="border-t border-[rgba(255,255,255,0.06)]">
         <div className="max-w-7xl mx-auto px-6 md:px-12 py-24">
           <div className="max-w-2xl mb-14">
             <h2 className="text-3xl font-bold tracking-tight mb-3">The scoring system</h2>
@@ -350,7 +350,7 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
               { label: 'Solution viewed', value: '-50%', desc: 'Viewing the answer before solving', icon: Eye, color: '#F87171' },
               { label: 'No partial credit', value: '0 pts', desc: 'Must find ALL bugs or pass ALL tests', icon: Bug, color: '#71717A' },
             ].map((rule) => (
-              <div key={rule.label} className="rounded-xl border border-[#1C1C1F] bg-[#0C0C0E] p-5">
+              <div key={rule.label} className="rounded-xl border border-[rgba(255,255,255,0.06)] bg-[#0D0F14] p-5">
                 <rule.icon className="w-5 h-5 mb-3" style={{ color: rule.color }} />
                 <div className="text-xl font-bold font-mono mb-1" style={{ color: rule.color }}>{rule.value}</div>
                 <div className="text-sm font-medium mb-1">{rule.label}</div>
@@ -362,7 +362,7 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
       </section>
 
       {/* CTA */}
-      <section className="border-t border-[#1C1C1F]">
+      <section className="border-t border-[rgba(255,255,255,0.06)]">
         <div className="max-w-7xl mx-auto px-6 md:px-12 py-24">
           <div className="rounded-2xl border border-[#22C55E]/15 bg-[#22C55E]/[0.03] p-12 md:p-16 text-center">
             <div className="font-mono text-3xl font-bold text-[#22C55E] mb-4">&lt;v/&gt;</div>
@@ -375,7 +375,7 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
                 Create your account
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
-              <Button onClick={() => navigate('/problems')} variant="ghost" className="text-[#A1A1AA] hover:text-white text-sm h-11 border border-[#27272A] hover:border-[#3F3F46] hover:bg-white/5 rounded-lg">
+              <Button onClick={() => navigate('/problems')} variant="ghost" className="text-[#A1A1AA] hover:text-white text-sm h-11 border border-[rgba(255,255,255,0.1)] hover:border-[#3F3F46] hover:bg-white/5 rounded-lg">
                 Explore problems
                 <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
@@ -385,7 +385,7 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-[#1C1C1F] py-8">
+      <footer className="border-t border-[rgba(255,255,255,0.06)] py-8">
         <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <span className="font-mono text-sm text-[#22C55E]">&lt;v/&gt;</span>

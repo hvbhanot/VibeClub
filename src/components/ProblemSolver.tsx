@@ -624,7 +624,7 @@ export function ProblemSolver({
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="bg-[#09090B] border-b border-[#1C1C1F] sticky top-0 z-50">
+      <header className="bg-[#0A0C10] border-b border-[rgba(255,255,255,0.06)] sticky top-0 z-50">
         <div className="max-w-full mx-auto px-6 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -632,21 +632,21 @@ export function ProblemSolver({
                 variant="ghost"
                 size="sm"
                 onClick={onBack}
-                className="text-[#71717A] hover:text-[#E4E4E7] hover:bg-[#1C1C1F]"
+                className="text-white/40 hover:text-white/90 hover:bg-[rgba(255,255,255,0.06)]"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back
               </Button>
 
-              <div className="h-6 w-px bg-[#1C1C1F]" />
+              <div className="h-6 w-px bg-[rgba(255,255,255,0.06)]" />
               
               <div className="flex items-center gap-3">
-                <span className="text-[#52525B] font-mono text-sm">#{String(problem.id).padStart(3, '0')}</span>
-                <h1 className="text-base font-medium text-[#E4E4E7]">{problem.title}</h1>
+                <span className="text-white/30 font-mono text-sm">#{String(problem.id).padStart(3, '0')}</span>
+                <h1 className="text-base font-medium text-white/90">{problem.title}</h1>
                 <span className={`text-xs font-medium px-2 py-1 rounded-full border ${getDifficultyBadge(problem.difficulty)}`}>
                   {problem.difficulty.charAt(0).toUpperCase() + problem.difficulty.slice(1)}
                 </span>
-                <span className="text-xs text-[#71717A]">
+                <span className="text-xs text-white/40">
                   {maxPoints} pts
                 </span>
               </div>
@@ -658,7 +658,7 @@ export function ProblemSolver({
                 size="icon"
                 onClick={onPrevious}
                 disabled={!hasPrevious}
-                className="text-[#71717A] hover:text-[#E4E4E7] hover:bg-[#1C1C1F] disabled:opacity-30"
+                className="text-white/40 hover:text-white/90 hover:bg-[rgba(255,255,255,0.06)] disabled:opacity-30"
               >
                 <ChevronLeft className="w-5 h-5" />
               </Button>
@@ -667,7 +667,7 @@ export function ProblemSolver({
                 size="icon"
                 onClick={onNext}
                 disabled={!hasNext}
-                className="text-[#71717A] hover:text-[#E4E4E7] hover:bg-[#1C1C1F] disabled:opacity-30"
+                className="text-white/40 hover:text-white/90 hover:bg-[rgba(255,255,255,0.06)] disabled:opacity-30"
               >
                 <ChevronRight className="w-5 h-5" />
               </Button>
@@ -679,15 +679,15 @@ export function ProblemSolver({
       {/* Main Content */}
       <div className="flex-1 flex">
         {/* Left Panel - Description */}
-        <div className="w-[45%] border-r border-[#1C1C1F] flex flex-col">
+        <div className="w-[45%] border-r border-[rgba(255,255,255,0.06)] flex flex-col">
           {/* Tabs */}
-          <div className="flex border-b border-[#1C1C1F]">
+          <div className="flex border-b border-[rgba(255,255,255,0.06)]">
             <button
               onClick={() => setActiveTab('description')}
               className={`flex items-center gap-2 px-5 py-3 text-sm transition-colors ${
                 activeTab === 'description'
-                  ? 'text-[#E4E4E7] border-b-2 border-[#22C55E]'
-                  : 'text-[#71717A] hover:text-[#E4E4E7]'
+                  ? 'text-white/90 border-b-2 border-[#22C55E]'
+                  : 'text-white/40 hover:text-white/90'
               }`}
             >
               <FileText className="w-3.5 h-3.5" />
@@ -697,8 +697,8 @@ export function ProblemSolver({
               onClick={() => setActiveTab('hint')}
               className={`flex items-center gap-2 px-5 py-3 text-sm transition-colors ${
                 activeTab === 'hint'
-                  ? 'text-[#E4E4E7] border-b-2 border-[#22C55E]'
-                  : 'text-[#71717A] hover:text-[#E4E4E7]'
+                  ? 'text-white/90 border-b-2 border-[#22C55E]'
+                  : 'text-white/40 hover:text-white/90'
               }`}
             >
               <Lightbulb className="w-3.5 h-3.5" />
@@ -708,8 +708,8 @@ export function ProblemSolver({
               onClick={() => setActiveTab('solution')}
               className={`flex items-center gap-2 px-5 py-3 text-sm transition-colors ${
                 activeTab === 'solution'
-                  ? 'text-[#E4E4E7] border-b-2 border-[#22C55E]'
-                  : 'text-[#71717A] hover:text-[#E4E4E7]'
+                  ? 'text-white/90 border-b-2 border-[#22C55E]'
+                  : 'text-white/40 hover:text-white/90'
               }`}
             >
               <BookOpen className="w-3.5 h-3.5" />
@@ -726,16 +726,16 @@ export function ProblemSolver({
                     <Sparkles className="w-5 h-5 text-[#22C55E]" />
                     <h2 className="text-lg font-semibold text-white">The Scenario</h2>
                   </div>
-                  <p className="text-[#A1A1AA] leading-relaxed">{problem.description}</p>
+                  <p className="text-white/60 leading-relaxed">{problem.description}</p>
                 </div>
 
                 {problem.type === 'find' && (
-                  <div className="p-4 bg-[#0C0C0E] border border-[#1C1C1F] rounded-md">
+                  <div className="p-4 bg-[#0D0F14] border border-[rgba(255,255,255,0.06)] rounded-md">
                     <div className="flex items-start gap-3">
                       <AlertTriangle className="w-5 h-5 text-[#22C55E] mt-0.5" />
                       <div>
-                        <p className="text-sm font-medium text-[#E4E4E7] mb-1">Your Mission</p>
-                        <p className="text-sm text-[#71717A]">
+                        <p className="text-sm font-medium text-white/90 mb-1">Your Mission</p>
+                        <p className="text-sm text-white/40">
                           Click on line numbers to mark bugs. Click again to unselect. 
                           Submit when you think you have found all bugs. Remember: some problems may have no bugs!
                         </p>
@@ -745,12 +745,12 @@ export function ProblemSolver({
                 )}
 
                 {problem.type === 'fix' && problem.expectedOutput && (
-                  <div className="p-4 bg-[#0C0C0E] border border-[#1C1C1F] rounded-md">
+                  <div className="p-4 bg-[#0D0F14] border border-[rgba(255,255,255,0.06)] rounded-md">
                     <div className="flex items-start gap-3">
                       <CheckCircle2 className="w-5 h-5 text-[#22C55E] mt-0.5" />
                       <div>
-                        <p className="text-sm font-medium text-[#E4E4E7] mb-1">Expected Output</p>
-                        <pre className="text-sm text-[#A1A1AA] font-mono">{problem.expectedOutput}</pre>
+                        <p className="text-sm font-medium text-white/90 mb-1">Expected Output</p>
+                        <pre className="text-sm text-white/60 font-mono">{problem.expectedOutput}</pre>
                       </div>
                     </div>
                   </div>
@@ -758,12 +758,12 @@ export function ProblemSolver({
 
                 {problem.type === 'recall' && (
                   <div className="space-y-4">
-                    <div className="p-4 bg-[#0C0C0E] border border-[#1C1C1F] rounded-md">
+                    <div className="p-4 bg-[#0D0F14] border border-[rgba(255,255,255,0.06)] rounded-md">
                       <div className="flex items-start gap-3">
                         <Terminal className="w-5 h-5 text-[#22C55E] mt-0.5" />
                         <div>
-                          <p className="text-sm font-medium text-[#E4E4E7] mb-1">Blank Page Challenge</p>
-                          <p className="text-sm text-[#71717A]">
+                          <p className="text-sm font-medium text-white/90 mb-1">Blank Page Challenge</p>
+                          <p className="text-sm text-white/40">
                             Write your solution from scratch in the editor. No starter code is provided beyond the function signature.
                             Click "Run Tests" to validate against {problem.testCases?.length || 0} test cases. All tests must pass to earn points.
                           </p>
@@ -793,10 +793,10 @@ export function ProblemSolver({
                                       : <XCircle className="w-4 h-4 text-red-400" />
                                   )}
                                 </div>
-                                <div className="text-[#71717A] text-xs">
+                                <div className="text-white/40 text-xs">
                                   <span className="text-gray-600">Input:</span> <code>{tc.input}</code>
                                 </div>
-                                <div className="text-[#71717A] text-xs">
+                                <div className="text-white/40 text-xs">
                                   <span className="text-gray-600">Expected:</span> <code>{tc.expectedOutput}</code>
                                 </div>
                                 {result && !result.passed && (
@@ -814,18 +814,18 @@ export function ProblemSolver({
                 )}
 
                 {userProgress && (
-                  <div className="pt-4 border-t border-[#1C1C1F]">
+                  <div className="pt-4 border-t border-[rgba(255,255,255,0.06)]">
                     <div className="flex items-center gap-2 mb-3">
                       <CheckSquare className="w-4 h-4 text-[#22C55E]" />
                       <span className="text-sm font-medium text-white">Your Progress</span>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-[#0C0C0E] border border-[#1C1C1F] p-4 rounded-md">
-                        <div className="text-xs text-[#71717A]">Best Score</div>
+                      <div className="bg-[#0D0F14] border border-[rgba(255,255,255,0.06)] p-4 rounded-md">
+                        <div className="text-xs text-white/40">Best Score</div>
                         <div className="text-2xl font-bold text-green-400">{userProgress.bestScore} pts</div>
                       </div>
-                      <div className="bg-[#0C0C0E] border border-[#1C1C1F] p-4 rounded-md">
-                        <div className="text-xs text-[#71717A]">Attempts</div>
+                      <div className="bg-[#0D0F14] border border-[rgba(255,255,255,0.06)] p-4 rounded-md">
+                        <div className="text-xs text-white/40">Attempts</div>
                         <div className="text-2xl font-bold text-white">{attempts}</div>
                       </div>
                     </div>
@@ -847,8 +847,8 @@ export function ProblemSolver({
                     <div className="w-14 h-14 rounded-xl bg-[#FBBF24]/10 border border-[#FBBF24]/20 flex items-center justify-center mx-auto mb-5">
                       <Lightbulb className="w-6 h-6 text-[#FBBF24]" />
                     </div>
-                    <h3 className="text-base font-semibold text-[#E4E4E7] mb-2">Need a nudge?</h3>
-                    <p className="text-sm text-[#A1A1AA] mb-1 max-w-xs mx-auto">
+                    <h3 className="text-base font-semibold text-white/90 mb-2">Need a nudge?</h3>
+                    <p className="text-sm text-white/60 mb-1 max-w-xs mx-auto">
                       Hints give you a direction to investigate without revealing the answer.
                     </p>
                     <p className="text-xs text-[#FBBF24] mb-6">
@@ -870,21 +870,21 @@ export function ProblemSolver({
                     </div>
 
                     <div className="p-4 bg-[#FBBF24]/5 border border-[#FBBF24]/15 rounded-lg">
-                      <p className="text-sm text-[#E4E4E7] leading-relaxed">{problem.hint}</p>
+                      <p className="text-sm text-white/90 leading-relaxed">{problem.hint}</p>
                     </div>
 
-                    <div className="p-4 bg-[#0C0C0E] border border-[#1C1C1F] rounded-lg">
-                      <h4 className="text-xs font-semibold text-[#71717A] uppercase tracking-wider mb-3">Questions to ask yourself</h4>
+                    <div className="p-4 bg-[#0D0F14] border border-[rgba(255,255,255,0.06)] rounded-lg">
+                      <h4 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-3">Questions to ask yourself</h4>
                       <ul className="space-y-2.5">
-                        <li className="flex items-start gap-2.5 text-sm text-[#A1A1AA]">
+                        <li className="flex items-start gap-2.5 text-sm text-white/60">
                           <ChevronRight className="w-3.5 h-3.5 text-[#FBBF24] mt-0.5 shrink-0" />
                           <span>What does this code assume about its inputs?</span>
                         </li>
-                        <li className="flex items-start gap-2.5 text-sm text-[#A1A1AA]">
+                        <li className="flex items-start gap-2.5 text-sm text-white/60">
                           <ChevronRight className="w-3.5 h-3.5 text-[#FBBF24] mt-0.5 shrink-0" />
                           <span>What would happen with edge cases or unexpected values?</span>
                         </li>
-                        <li className="flex items-start gap-2.5 text-sm text-[#A1A1AA]">
+                        <li className="flex items-start gap-2.5 text-sm text-white/60">
                           <ChevronRight className="w-3.5 h-3.5 text-[#FBBF24] mt-0.5 shrink-0" />
                           <span>Is there a Python-specific behavior being misused here?</span>
                         </li>
@@ -902,8 +902,8 @@ export function ProblemSolver({
                     <div className="w-14 h-14 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-5">
                       <BookOpen className="w-6 h-6 text-[#F87171]" />
                     </div>
-                    <h3 className="text-base font-semibold text-[#E4E4E7] mb-2">View the full lesson</h3>
-                    <p className="text-sm text-[#A1A1AA] mb-1 max-w-xs mx-auto">
+                    <h3 className="text-base font-semibold text-white/90 mb-2">View the full lesson</h3>
+                    <p className="text-sm text-white/60 mb-1 max-w-xs mx-auto">
                       See what went wrong, why it matters, and the correct approach — explained step by step.
                     </p>
                     <p className="text-xs text-[#F87171] mb-6">
@@ -927,16 +927,16 @@ export function ProblemSolver({
                           <div className="w-6 h-6 rounded-md bg-[#F87171]/10 flex items-center justify-center">
                             <span className="text-xs font-bold text-[#F87171]">1</span>
                           </div>
-                          <h3 className="text-sm font-semibold text-[#E4E4E7]">What went wrong</h3>
+                          <h3 className="text-sm font-semibold text-white/90">What went wrong</h3>
                         </div>
                         {problem.bugLines.map(line => (
-                          <div key={line} className="mb-4 rounded-lg border border-[#1C1C1F] overflow-hidden">
-                            <div className="px-4 py-2 bg-[#F87171]/5 border-b border-[#1C1C1F] flex items-center gap-2">
+                          <div key={line} className="mb-4 rounded-lg border border-[rgba(255,255,255,0.06)] overflow-hidden">
+                            <div className="px-4 py-2 bg-[#F87171]/5 border-b border-[rgba(255,255,255,0.06)] flex items-center gap-2">
                               <Bug className="w-3.5 h-3.5 text-[#F87171]" />
                               <span className="text-xs font-semibold text-[#F87171] font-mono">Line {line}</span>
                             </div>
                             <div className="p-4">
-                              <p className="text-sm text-[#A1A1AA] leading-relaxed">{problem.bugExplanations[line]}</p>
+                              <p className="text-sm text-white/60 leading-relaxed">{problem.bugExplanations[line]}</p>
                             </div>
                           </div>
                         ))}
@@ -947,10 +947,10 @@ export function ProblemSolver({
                           <div className="w-6 h-6 rounded-md bg-[#22C55E]/10 flex items-center justify-center">
                             <span className="text-xs font-bold text-[#22C55E]">1</span>
                           </div>
-                          <h3 className="text-sm font-semibold text-[#E4E4E7]">No bugs here</h3>
+                          <h3 className="text-sm font-semibold text-white/90">No bugs here</h3>
                         </div>
                         <div className="p-4 bg-[#22C55E]/5 border border-[#22C55E]/15 rounded-lg">
-                          <p className="text-sm text-[#A1A1AA] leading-relaxed">
+                          <p className="text-sm text-white/60 leading-relaxed">
                             This code has no bugs — it was a test of careful reading. In real code reviews,
                             not every file has issues. Knowing when code is correct is just as important as
                             finding what's wrong.
@@ -965,10 +965,10 @@ export function ProblemSolver({
                         <div className="w-6 h-6 rounded-md bg-[#FBBF24]/10 flex items-center justify-center">
                           <span className="text-xs font-bold text-[#FBBF24]">2</span>
                         </div>
-                        <h3 className="text-sm font-semibold text-[#E4E4E7]">Why this matters</h3>
+                        <h3 className="text-sm font-semibold text-white/90">Why this matters</h3>
                       </div>
-                      <div className="p-4 bg-[#0C0C0E] border border-[#1C1C1F] rounded-lg">
-                        <p className="text-sm text-[#A1A1AA] leading-relaxed">
+                      <div className="p-4 bg-[#0D0F14] border border-[rgba(255,255,255,0.06)] rounded-lg">
+                        <p className="text-sm text-white/60 leading-relaxed">
                           {problem.category === 'security' && 'Security bugs like this can expose user data, enable injection attacks, or bypass authentication. In production, these are the bugs that make headlines.'}
                           {problem.category === 'type' && 'Type errors are the most common class of Python bugs. They silently pass in development but crash in production when real data hits unexpected code paths.'}
                           {problem.category === 'logic' && 'Logic bugs are insidious because the code runs without errors — it just produces wrong results. These are the hardest to catch in code review and the most expensive to fix in production.'}
@@ -992,14 +992,14 @@ export function ProblemSolver({
                           <div className="w-6 h-6 rounded-md bg-[#22C55E]/10 flex items-center justify-center">
                             <span className="text-xs font-bold text-[#22C55E]">3</span>
                           </div>
-                          <h3 className="text-sm font-semibold text-[#E4E4E7]">The correct approach</h3>
+                          <h3 className="text-sm font-semibold text-white/90">The correct approach</h3>
                         </div>
-                        <div className="rounded-lg border border-[#1C1C1F] overflow-hidden">
-                          <div className="px-4 py-2 bg-[#111113] border-b border-[#1C1C1F] flex items-center gap-2">
+                        <div className="rounded-lg border border-[rgba(255,255,255,0.06)] overflow-hidden">
+                          <div className="px-4 py-2 bg-[#12141A] border-b border-[rgba(255,255,255,0.06)] flex items-center gap-2">
                             <CheckCircle2 className="w-3.5 h-3.5 text-[#22C55E]" />
-                            <span className="text-xs text-[#52525B] font-mono">fixed_code.py</span>
+                            <span className="text-xs text-white/30 font-mono">fixed_code.py</span>
                           </div>
-                          <div className="p-4 bg-[#0C0C0E] overflow-x-auto">
+                          <div className="p-4 bg-[#0D0F14] overflow-x-auto">
                             <pre className="text-[13px] text-[#D4D4D8] font-mono leading-6">
                               <code>{problem.fixedCode}</code>
                             </pre>
@@ -1026,10 +1026,10 @@ export function ProblemSolver({
                         <div className="w-6 h-6 rounded-md bg-[#A78BFA]/10 flex items-center justify-center">
                           <span className="text-xs font-bold text-[#A78BFA]">4</span>
                         </div>
-                        <h3 className="text-sm font-semibold text-[#E4E4E7]">Key takeaway</h3>
+                        <h3 className="text-sm font-semibold text-white/90">Key takeaway</h3>
                       </div>
                       <div className="p-4 bg-[#A78BFA]/5 border border-[#A78BFA]/15 rounded-lg">
-                        <p className="text-sm text-[#A1A1AA] leading-relaxed">
+                        <p className="text-sm text-white/60 leading-relaxed">
                           {problem.difficulty === 'easy' && 'This is a foundational concept. If you got it wrong, don\'t worry — now you know the pattern. You\'ll recognize it instantly next time.'}
                           {problem.difficulty === 'medium' && 'This requires deeper Python knowledge. Understanding this pattern will help you write more robust code and catch similar issues in code reviews.'}
                           {problem.difficulty === 'hard' && 'This is an advanced concept that trips up even senior developers. Mastering it puts you ahead of most Python programmers.'}
@@ -1046,16 +1046,16 @@ export function ProblemSolver({
         {/* Right Panel - Code Editor */}
         <div className="flex-1 flex flex-col bg-black/30">
           {/* Editor Toolbar */}
-          <div className="flex items-center justify-between px-4 py-2 border-b border-[#1C1C1F]">
+          <div className="flex items-center justify-between px-4 py-2 border-b border-[rgba(255,255,255,0.06)]">
             <div className="flex items-center gap-3">
-              <span className="text-sm text-[#71717A]">Python</span>
+              <span className="text-sm text-white/40">Python</span>
               {problem.type === 'find' && selectedLines.length > 0 && (
-                <span className="text-sm text-[#A1A1AA]">
+                <span className="text-sm text-white/60">
                   {selectedLines.length} line(s) selected
                 </span>
               )}
               {attempts > 0 && (
-                <span className="text-xs text-[#52525B] font-mono">
+                <span className="text-xs text-white/30 font-mono">
                   attempt #{attempts + (showResult ? 0 : 1)}
                 </span>
               )}
@@ -1072,7 +1072,7 @@ export function ProblemSolver({
                   onClick={handleRunCode}
                   disabled={isRunning}
                   variant="outline"
-                  className="border-[#1C1C1F] text-green-400 hover:bg-[#1C1C1F] text-sm h-8"
+                  className="border-[rgba(255,255,255,0.06)] text-green-400 hover:bg-[rgba(255,255,255,0.06)] text-sm h-8"
                 >
                   <Play className="w-4 h-4 mr-2" />
                   {isRunning ? 'Running...' : 'Run Code'}
@@ -1083,7 +1083,7 @@ export function ProblemSolver({
                   onClick={handleRunTests}
                   disabled={isRunning}
                   variant="outline"
-                  className="border-[#1C1C1F] text-green-400 hover:bg-[#1C1C1F] text-sm h-8"
+                  className="border-[rgba(255,255,255,0.06)] text-green-400 hover:bg-[rgba(255,255,255,0.06)] text-sm h-8"
                 >
                   <Play className="w-4 h-4 mr-2" />
                   {isRunning ? 'Running...' : 'Run Tests'}
@@ -1104,11 +1104,11 @@ export function ProblemSolver({
           {/* Code Area */}
           <div className="flex-1 overflow-auto p-4">
             {problem.type === 'find' ? (
-              <div className="font-mono text-sm rounded-md overflow-hidden border border-[#1C1C1F] p-4" style={{ backgroundColor: '#0C0C0E' }}>
+              <div className="font-mono text-sm rounded-md overflow-hidden border border-[rgba(255,255,255,0.06)] p-4" style={{ backgroundColor: '#0D0F14' }}>
                 {renderCodeLines()}
               </div>
             ) : (
-              <div className="h-full rounded-md overflow-hidden border border-[#1C1C1F]" style={{ backgroundColor: '#0C0C0E' }}>
+              <div className="h-full rounded-md overflow-hidden border border-[rgba(255,255,255,0.06)]" style={{ backgroundColor: '#0D0F14' }}>
                 <Editor
                   key={`editor-${problem.id}`}
                   height="100%"
@@ -1136,8 +1136,8 @@ export function ProblemSolver({
 
           {/* Terminal Output Panel - Always visible for fix and recall problems */}
           {(problem.type === 'fix' || problem.type === 'recall') && !showResult && (
-            <div className="border-t border-[#1C1C1F] bg-[#09090B] h-[200px] flex flex-col">
-              <div className="px-4 py-2 border-b border-[#1C1C1F] flex items-center gap-2 shrink-0">
+            <div className="border-t border-[rgba(255,255,255,0.06)] bg-[#0A0C10] h-[200px] flex flex-col">
+              <div className="px-4 py-2 border-b border-[rgba(255,255,255,0.06)] flex items-center gap-2 shrink-0">
                 <Terminal className="w-4 h-4 text-green-400" />
                 <span className="text-sm font-medium text-green-400">Terminal Output</span>
                 {isRunning && (
@@ -1152,14 +1152,14 @@ export function ProblemSolver({
               </div>
               <div className="flex-1 p-4 overflow-auto font-mono text-sm">
                 {terminalOutput.length === 0 && !terminalError && !isRunning && (
-                  <span className="text-[#52525B] italic">Click "Run Code" to see output...</span>
+                  <span className="text-white/30 italic">Click "Run Code" to see output...</span>
                 )}
                 {isRunning && (
                   <span className="text-[#22C55E]">Running code...</span>
                 )}
                 {terminalOutput.map((line, idx) => (
-                  <div key={idx} className="text-[#E4E4E7]/80">
-                    {line || <span className="text-[#3F3F46]">(empty line)</span>}
+                  <div key={idx} className="text-white/90/80">
+                    {line || <span className="text-white/20">(empty line)</span>}
                   </div>
                 ))}
                 {terminalError && (
@@ -1172,13 +1172,13 @@ export function ProblemSolver({
                   </div>
                 )}
                 {problem.expectedOutput && !terminalError && terminalOutput.length > 0 && (
-                  <div className="mt-2 pt-2 border-t border-[#1C1C1F]">
+                  <div className="mt-2 pt-2 border-t border-[rgba(255,255,255,0.06)]">
                     {terminalOutput.join('\n').trim() === problem.expectedOutput.trim() ? (
                       <span className="text-green-400 text-xs">Output matches expected</span>
                     ) : (
                       <>
                         <span className="text-yellow-400 text-xs">Output differs from expected</span>
-                        <div className="text-[#71717A] text-xs mt-1">
+                        <div className="text-white/40 text-xs mt-1">
                           Expected: {problem.expectedOutput}
                         </div>
                       </>
@@ -1191,7 +1191,7 @@ export function ProblemSolver({
 
           {/* Results Panel */}
           {showResult && submissionResult && (
-            <div className="border-t border-[#1C1C1F] bg-[#0C0C0E] max-h-[300px] overflow-auto">
+            <div className="border-t border-[rgba(255,255,255,0.06)] bg-[#0D0F14] max-h-[300px] overflow-auto">
               <div className="p-4 space-y-4">
                 {/* Score */}
                 <div className={`p-4 rounded-lg ${
@@ -1218,14 +1218,14 @@ export function ProblemSolver({
 
                   {/* Score breakdown */}
                   <div className="mt-3 space-y-1.5 text-sm">
-                    <div className="flex items-center justify-between text-[#A1A1AA]">
+                    <div className="flex items-center justify-between text-white/60">
                       <span>Attempts</span>
                       <span className="font-mono">{attempts}</span>
                     </div>
                     {submissionResult.passed && (
-                      <div className="flex items-center justify-between text-[#A1A1AA]">
+                      <div className="flex items-center justify-between text-white/60">
                         <span>Base score</span>
-                        <span className="font-mono text-[#E4E4E7]">{maxPoints} pts</span>
+                        <span className="font-mono text-white/90">{maxPoints} pts</span>
                       </div>
                     )}
                     {hasUsedHint && (
@@ -1241,7 +1241,7 @@ export function ProblemSolver({
                       </div>
                     )}
                     {submissionResult.passed && (hasUsedHint || hasViewedSolution) && (
-                      <div className="flex items-center justify-between pt-1.5 border-t border-[#1C1C1F] text-[#22C55E] font-medium">
+                      <div className="flex items-center justify-between pt-1.5 border-t border-[rgba(255,255,255,0.06)] text-[#22C55E] font-medium">
                         <span>Final score</span>
                         <span className="font-mono">{submissionResult.score} pts</span>
                       </div>
@@ -1249,7 +1249,7 @@ export function ProblemSolver({
                   </div>
 
                   {!submissionResult.passed && (
-                    <p className="text-sm text-[#71717A] mt-3">
+                    <p className="text-sm text-white/40 mt-3">
                       You must find ALL bugs correctly to earn points. No partial credit.
                     </p>
                   )}
@@ -1292,7 +1292,7 @@ export function ProblemSolver({
                     <Button
                       onClick={handleRetry}
                       variant="outline"
-                      className="border-[#1C1C1F] text-[#A1A1AA] hover:bg-[#1C1C1F] hover:text-[#E4E4E7]"
+                      className="border-[rgba(255,255,255,0.06)] text-white/60 hover:bg-[rgba(255,255,255,0.06)] hover:text-white/90"
                     >
                       <RotateCcw className="w-4 h-4 mr-2" />
                       Retry
