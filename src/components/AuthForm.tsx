@@ -83,14 +83,14 @@ export function AuthForm({ onLogin, onRegister, initialMode = 'login', onSuccess
     setConfirmPassword('');
   };
 
-  const inputClass = "bg-[#111] border-[#222] text-[#EDEDED] placeholder:text-[#555] focus:border-[#4F8CFF] focus:ring-1 focus:ring-[#4F8CFF]/20 rounded-md h-11 text-sm";
+  const inputClass = "bg-[#111] border-[#222] text-[#EDEDED] placeholder:text-[#555] focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E]/20 rounded-md h-11 text-sm";
 
   if (isLogin) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-[#0B0B0B]">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-[#09090B]">
         <div className="w-full max-w-sm">
           <div className="text-center mb-10">
-            <div className="font-mono text-2xl font-bold text-[#4F8CFF] mb-2">&lt;v/&gt;</div>
+            <div className="font-mono text-2xl font-bold text-[#22C55E] mb-2">&lt;v/&gt;</div>
             <h1 className="text-2xl font-semibold text-[#EDEDED] mb-1">vibeclub</h1>
             <p className="text-[#888] text-sm">Welcome back</p>
           </div>
@@ -128,7 +128,7 @@ export function AuthForm({ onLogin, onRegister, initialMode = 'login', onSuccess
 
             <Button
               type="submit"
-              className="w-full bg-[#4F8CFF] hover:bg-[#3D7AED] text-white font-medium h-11 rounded-md text-sm"
+              className="w-full bg-[#22C55E] hover:bg-[#16A34A] text-white font-medium h-11 rounded-md text-sm"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -139,7 +139,7 @@ export function AuthForm({ onLogin, onRegister, initialMode = 'login', onSuccess
             </Button>
 
             <div className="text-center pt-2">
-              <button type="button" onClick={switchToRegister} className="text-sm text-[#888] hover:text-[#4F8CFF] transition-colors">
+              <button type="button" onClick={switchToRegister} className="text-sm text-[#888] hover:text-[#22C55E] transition-colors">
                 New here? Create an account
               </button>
             </div>
@@ -150,10 +150,10 @@ export function AuthForm({ onLogin, onRegister, initialMode = 'login', onSuccess
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-[#0B0B0B]">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-[#09090B]">
       <div className="w-full max-w-sm">
         <div className="text-center mb-10">
-          <div className="font-mono text-2xl font-bold text-[#4F8CFF] mb-2">&lt;v/&gt;</div>
+          <div className="font-mono text-2xl font-bold text-[#22C55E] mb-2">&lt;v/&gt;</div>
           <h1 className="text-2xl font-semibold text-[#EDEDED] mb-1">Join vibeclub</h1>
           <p className="text-[#888] text-sm">TAMUCC students only</p>
         </div>
@@ -219,7 +219,7 @@ export function AuthForm({ onLogin, onRegister, initialMode = 'login', onSuccess
 
           <Button
             type="submit"
-            className="w-full bg-[#4F8CFF] hover:bg-[#3D7AED] text-white font-medium h-11 rounded-md text-sm"
+            className="w-full bg-[#22C55E] hover:bg-[#16A34A] text-white font-medium h-11 rounded-md text-sm"
             disabled={isLoading}
           >
             {isLoading ? (
@@ -230,7 +230,7 @@ export function AuthForm({ onLogin, onRegister, initialMode = 'login', onSuccess
           </Button>
 
           <div className="text-center pt-2">
-            <button type="button" onClick={switchToLogin} className="text-sm text-[#888] hover:text-[#4F8CFF] transition-colors">
+            <button type="button" onClick={switchToLogin} className="text-sm text-[#888] hover:text-[#22C55E] transition-colors">
               Already have an account? Sign in
             </button>
           </div>

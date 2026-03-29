@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,24 +8,24 @@
   :root {
     --background: 0 0% 4%;
     --foreground: 0 0% 93%;
-    --card: 0 0% 8%;
+    --card: 0 0% 7%;
     --card-foreground: 0 0% 93%;
-    --popover: 0 0% 8%;
+    --popover: 0 0% 7%;
     --popover-foreground: 0 0% 93%;
-    --primary: 217 100% 65%;
+    --primary: 145 80% 42%;
     --primary-foreground: 0 0% 100%;
     --secondary: 0 0% 12%;
     --secondary-foreground: 0 0% 93%;
     --muted: 0 0% 12%;
-    --muted-foreground: 0 0% 45%;
-    --accent: 217 100% 65%;
+    --muted-foreground: 0 0% 50%;
+    --accent: 145 80% 42%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 14%;
-    --input: 0 0% 14%;
-    --ring: 217 100% 65%;
-    --radius: 0.375rem;
+    --border: 0 0% 13%;
+    --input: 0 0% 13%;
+    --ring: 145 80% 42%;
+    --radius: 0.5rem;
   }
 }
 
@@ -33,78 +35,87 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
-    background: #0B0B0B;
+    font-family: 'Space Grotesk', -apple-system, sans-serif;
+    background: #09090B;
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  code, pre, .font-mono {
+    font-family: 'JetBrains Mono', monospace;
   }
 }
 
-/* Minimal scrollbar */
+/* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
-
 ::-webkit-scrollbar-track {
   background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: #333;
+  background: #27272A;
   border-radius: 3px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: #3F3F46;
 }
 
-/* Clean card */
+/* Cards */
 .glass-card {
-  background: #141414;
-  border: 1px solid #1E1E1E;
+  background: #111113;
+  border: 1px solid #1C1C1F;
 }
-
 .glass-card:hover {
-  border-color: #2A2A2A;
+  border-color: #27272A;
 }
 
-/* Code block styling */
+/* Code blocks */
 .code-block {
-  background: #111;
-  border: 1px solid #1E1E1E;
-  border-radius: 6px;
+  background: #0C0C0E;
+  border: 1px solid #1C1C1F;
+  border-radius: 8px;
 }
 
-/* Difficulty badges - flat */
+/* Difficulty badges */
 .badge-easy {
-  background: rgba(34, 197, 94, 0.1);
+  background: rgba(34, 197, 94, 0.08);
   border: 1px solid rgba(34, 197, 94, 0.2);
-  color: #22c55e;
+  color: #4ADE80;
 }
-
 .badge-medium {
-  background: rgba(234, 179, 8, 0.1);
-  border: 1px solid rgba(234, 179, 8, 0.2);
-  color: #eab308;
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  color: #FBBF24;
 }
-
 .badge-hard {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  color: #ef4444;
+  background: rgba(248, 113, 113, 0.08);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  color: #F87171;
 }
 
 /* Selection */
 ::selection {
-  background: rgba(79, 140, 255, 0.3);
+  background: rgba(34, 197, 94, 0.25);
   color: white;
 }
 
-/* Progress bar */
-.progress-neon {
-  background: #1E1E1E;
+/* Terminal cursor blink */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.cursor-blink {
+  animation: blink 1s step-end infinite;
 }
 
-.progress-neon > div {
-  background: #4F8CFF;
+/* Subtle scan line effect for hero */
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+/* Accent green glow — used sparingly */
+.accent-glow {
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.15), 0 0 60px rgba(34, 197, 94, 0.05);
 }
