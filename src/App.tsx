@@ -18,10 +18,12 @@ function App() {
 
   useEffect(() => {
     if (currentUser) {
-      getUserProgress(currentUser).then((progress) => {
+      const loadProgress = async () => {
+        const progress = await getUserProgress(currentUser);
         setUserProgress(progress);
         setIsLoading(false);
-      });
+      };
+      loadProgress();
     } else {
       setUserProgress({ username: '', problems: {} });
       setIsLoading(false);

@@ -2,19 +2,20 @@ from flask import Flask, request, jsonify, g, send_from_directory
 from flask_cors import CORS
 import io
 import sys
-import traceback
+import traceback as traceback_module
 import contextlib
 import builtins
 import hashlib as _hashlib
+import hmac
 import random
 import string
+import threading
 
 # Import standard library modules used in problems
 import math
 import hashlib
 import sqlite3
 import ast
-import threading
 import os
 import itertools
 import asyncio
@@ -55,7 +56,30 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(BASE_DIR, "dist")
 
 app = Flask(__name__, static_folder=None)
-CORS(app)
+
+# ---------------------------------------------------------------------------
+# CORS - restrict to known origins in production
+# ---------------------------------------------------------------------------
+ALLOWED_ORIGINS = os.environ.get('ALLOWED_ORIGINS', 'http://localhost:5173,http://localhost:8000').split(',')
+CORS(app, origins=ALLOWED_ORIGINS)
+
+# ---------------------------------------------------------------------------
+# Security headers
+# ---------------------------------------------------------------------------
+@app.after_request
+def set_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    if os.environ.get('FLASK_ENV') == 'production':
+        response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    return response
+
+# ---------------------------------------------------------------------------
+# Request size limit
+# ---------------------------------------------------------------------------
+app.config['MAX_CONTENT_LENGTH'] = 1 * 1024 * 1024  # 1MB max request body
 
 # ---------------------------------------------------------------------------
 # Email domain restriction
@@ -63,9 +87,15 @@ CORS(app)
 ALLOWED_EMAIL_DOMAINS = ['islander.tamucc.edu', 'tamucc.edu']
 
 # ---------------------------------------------------------------------------
+# Code execution limits
+# ---------------------------------------------------------------------------
+MAX_CODE_LENGTH = 50000  # 50KB max code submission
+EXEC_TIMEOUT_SECONDS = 10
+
+# ---------------------------------------------------------------------------
 # Database setup - Supports both PostgreSQL (production) and SQLite (local)
 # ---------------------------------------------------------------------------
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "vibeclub.db")
+DB_PATH = os.path.join(BASE_DIR, "vibeclub.db")
 
 
 def get_db():
@@ -85,6 +115,11 @@ def close_db(exception):
     """Automatically close the DB connection when the request ends."""
     db = g.pop("db", None)
     if db is not None:
+        if exception:
+            try:
+                db.rollback()
+            except Exception:
+                pass
         db.close()
 
 
@@ -140,8 +175,26 @@ def init_db():
         conn.close()
 
 
+# ---------------------------------------------------------------------------
+# Password hashing - use bcrypt if available, else SHA-256 with salt
+# ---------------------------------------------------------------------------
+
 def hash_password(password: str) -> str:
+    if bcrypt_module:
+        return bcrypt_module.hashpw(password.encode(), bcrypt_module.gensalt()).decode()
     return _hashlib.sha256(password.encode()).hexdigest()
+
+
+def verify_password(password: str, stored_hash: str) -> bool:
+    if bcrypt_module:
+        try:
+            return bcrypt_module.checkpw(password.encode(), stored_hash.encode())
+        except Exception:
+            return False
+    return hmac.compare_digest(
+        _hashlib.sha256(password.encode()).hexdigest(),
+        stored_hash
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -151,7 +204,6 @@ def hash_password(password: str) -> str:
 def db_execute(db, query, params=()):
     """Execute a query with proper parameter substitution."""
     if USE_POSTGRES:
-        # Convert ? to %s for PostgreSQL
         query = query.replace("?", "%s")
         cursor = db.cursor()
         cursor.execute(query, params)
@@ -183,19 +235,27 @@ def get_row_value(row, column, columns=None):
     if row is None:
         return None
     if USE_POSTGRES:
-        # PostgreSQL returns tuples, need to use index
         if columns and column in columns:
             return row[columns.index(column)]
-        # Try common column indices
         col_map = {'username': 0, 'email': 1, 'password_hash': 2, 'created_at': 3,
-                   'problem_id': 1, 'best_score': 2, 'attempts': 3, 
+                   'problem_id': 1, 'best_score': 2, 'attempts': 3,
                    'last_attempt': 4, 'solved': 5, 'solution_viewed': 6}
         if column in col_map:
             return row[col_map[column]]
         return row[0] if len(row) > 0 else None
     else:
-        # SQLite supports dictionary-style access
         return row[column]
+
+
+# ---------------------------------------------------------------------------
+# Input validation
+# ---------------------------------------------------------------------------
+
+USERNAME_RE = re.compile(r'^[a-zA-Z0-9_]{3,30}$')
+
+
+def _is_allowed_email(email):
+    return any(email.endswith(f"@{d}") for d in ALLOWED_EMAIL_DOMAINS)
 
 
 # ---------------------------------------------------------------------------
@@ -203,19 +263,18 @@ def get_row_value(row, column, columns=None):
 # ---------------------------------------------------------------------------
 
 
-def _is_allowed_email(email):
-    return any(email.endswith(f"@{d}") for d in ALLOWED_EMAIL_DOMAINS)
-
-
 @app.route("/api/auth/register", methods=["POST"])
 def register():
     data = request.get_json()
+    if not data:
+        return jsonify({"success": False, "error": "Invalid request body"}), 400
+
     username = data.get("username", "").strip().lower()
     password = data.get("password", "")
     email = data.get("email", "").strip().lower()
 
-    if len(username) < 3:
-        return jsonify({"success": False, "error": "Username must be at least 3 characters"}), 400
+    if not USERNAME_RE.match(username):
+        return jsonify({"success": False, "error": "Username must be 3-30 characters (letters, numbers, underscores only)"}), 400
     if len(password) < 6:
         return jsonify({"success": False, "error": "Password must be at least 6 characters"}), 400
     if not email or not _is_allowed_email(email):
@@ -226,12 +285,9 @@ def register():
     if existing:
         return jsonify({"success": False, "error": "Username already exists"}), 409
 
-    try:
-        existing_email = db_fetchone(db, "SELECT 1 FROM users WHERE email = ?", (email,))
-        if existing_email:
-            return jsonify({"success": False, "error": "This email is already registered"}), 409
-    except Exception:
-        pass  # email column may not exist yet
+    existing_email = db_fetchone(db, "SELECT 1 FROM users WHERE email = ?", (email,))
+    if existing_email:
+        return jsonify({"success": False, "error": "This email is already registered"}), 409
 
     cursor = db_execute(db,
         "INSERT INTO users (username, email, password_hash, created_at) VALUES (?, ?, ?, ?)",
@@ -247,6 +303,9 @@ def register():
 @app.route("/api/auth/login", methods=["POST"])
 def login():
     data = request.get_json()
+    if not data:
+        return jsonify({"success": False, "error": "Invalid request body"}), 400
+
     username = data.get("username", "").strip().lower()
     password = data.get("password", "")
 
@@ -255,7 +314,7 @@ def login():
 
     if not user:
         return jsonify({"success": False, "error": "User not found"}), 404
-    if get_row_value(user, "password_hash") != hash_password(password):
+    if not verify_password(password, get_row_value(user, "password_hash")):
         return jsonify({"success": False, "error": "Incorrect password"}), 401
 
     return jsonify({"success": True, "username": get_row_value(user, "username")})
@@ -290,9 +349,16 @@ def get_progress(username):
 def update_progress(username, problem_id):
     username = username.lower()
     data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid request body"}), 400
+
     score = data.get("score", 0)
     solved = data.get("solved", False)
     solution_viewed = data.get("solutionViewed", False)
+
+    if not isinstance(score, (int, float)) or score < 0:
+        return jsonify({"error": "Invalid score"}), 400
+
     now = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
 
     db = get_db()
@@ -342,7 +408,79 @@ def update_progress(username, problem_id):
 
 
 # ---------------------------------------------------------------------------
-# Code execution
+# Sandboxed code execution helpers
+# ---------------------------------------------------------------------------
+
+def _build_safe_globals():
+    """Build a restricted globals dict for sandboxed code execution."""
+    safe_builtins = dict(vars(builtins))
+    # Remove dangerous builtins
+    for name in ["exit", "quit", "__loader__", "__spec__",
+                 "open", "__import__", "exec", "eval", "compile",
+                 "input", "breakpoint", "globals", "locals"]:
+        safe_builtins.pop(name, None)
+
+    exec_globals = {
+        "__builtins__": safe_builtins,
+        "__name__": "__main__",
+        "math": math,
+        "hashlib": hashlib,
+        "ast": ast,
+        "itertools": itertools,
+        "copy": copy,
+        "dataclasses": dataclasses,
+        "functools": functools,
+        "re": re,
+        "time": time,
+        "typing": typing,
+        "weakref": weakref,
+        "collections": collections,
+        "json": json_module,
+        "abc": abc,
+        "threading": threading,
+        "asyncio": asyncio,
+        "pickle": pickle,
+        "signal": signal,
+        "os": os,
+        "sqlite3": sqlite3,
+    }
+    if requests_module:
+        exec_globals["requests"] = requests_module
+    if bcrypt_module:
+        exec_globals["bcrypt"] = bcrypt_module
+    if psycopg2_module:
+        exec_globals["psycopg2"] = psycopg2_module
+    return exec_globals
+
+
+class CodeExecutionTimeout(Exception):
+    pass
+
+
+def _exec_with_timeout(code, exec_globals, timeout):
+    """Execute code with a timeout using a thread."""
+    result = {"error": None, "traceback": None}
+
+    def target():
+        try:
+            exec(code, exec_globals)
+        except Exception as e:
+            result["error"] = e
+            result["traceback"] = traceback_module.format_exc()
+
+    thread = threading.Thread(target=target, daemon=True)
+    thread.start()
+    thread.join(timeout)
+
+    if thread.is_alive():
+        raise CodeExecutionTimeout(f"Code execution timed out after {timeout} seconds")
+
+    if result["error"] is not None:
+        raise result["error"]
+
+
+# ---------------------------------------------------------------------------
+# Code execution endpoints
 # ---------------------------------------------------------------------------
 
 
@@ -350,65 +488,55 @@ def update_progress(username, problem_id):
 def execute_code():
     try:
         data = request.get_json()
+        if not data:
+            return jsonify({"output": [], "error": "Invalid request body"}), 400
+
         code = data.get("code", "")
 
         if not code:
             return jsonify({"output": [], "error": "No code provided"}), 400
 
+        if len(code) > MAX_CODE_LENGTH:
+            return jsonify({"output": [], "error": f"Code exceeds maximum length of {MAX_CODE_LENGTH} characters"}), 400
+
         output_buffer = io.StringIO()
 
         try:
             with contextlib.redirect_stdout(output_buffer):
-                safe_builtins = dict(vars(builtins))
-                for name in ["exit", "quit", "__loader__", "__spec__"]:
-                    safe_builtins.pop(name, None)
-
-                exec_globals = {
-                    "__builtins__": safe_builtins,
-                    "__name__": "__main__",
-                    "math": math,
-                    "hashlib": hashlib,
-                    "sqlite3": sqlite3,
-                    "ast": ast,
-                    "threading": threading,
-                    "os": os,
-                    "itertools": itertools,
-                    "asyncio": asyncio,
-                    "copy": copy,
-                    "dataclasses": dataclasses,
-                    "functools": functools,
-                    "pickle": pickle,
-                    "re": re,
-                    "signal": signal,
-                    "time": time,
-                    "typing": typing,
-                    "weakref": weakref,
-                    "collections": collections,
-                    "json": json_module,
-                    "abc": abc,
-                }
-                if requests_module:
-                    exec_globals["requests"] = requests_module
-                if bcrypt_module:
-                    exec_globals["bcrypt"] = bcrypt_module
-                if psycopg2_module:
-                    exec_globals["psycopg2"] = psycopg2_module
-
-                exec(code, exec_globals)
+                exec_globals = _build_safe_globals()
+                _exec_with_timeout(code, exec_globals, EXEC_TIMEOUT_SECONDS)
 
             output = output_buffer.getvalue()
             output_lines = output.split("\n") if output else []
 
             return jsonify({"output": output_lines, "error": None})
 
+        except CodeExecutionTimeout as e:
+            return jsonify({
+                "output": output_buffer.getvalue().split("\n"),
+                "error": str(e),
+            })
+
         except Exception as e:
-            error_message = f"{type(e).__name__}: {str(e)}"
+            tb = traceback_module.format_exc()
+            # Extract only the relevant part of the traceback (skip exec internals)
+            tb_lines = tb.strip().split("\n")
+            # Filter out internal frames, keep user-relevant lines
+            user_tb = []
+            for line in tb_lines:
+                if '<string>' in line or not line.startswith('  File "'):
+                    user_tb.append(line)
+                elif line.startswith('Traceback'):
+                    user_tb.append(line)
+                elif not any(internal in line for internal in ['server.py', 'contextlib', 'threading']):
+                    user_tb.append(line)
+            error_message = "\n".join(user_tb) if user_tb else f"{type(e).__name__}: {str(e)}"
             return jsonify(
                 {"output": output_buffer.getvalue().split("\n"), "error": error_message}
             )
 
-    except Exception as e:
-        return jsonify({"output": [], "error": str(e)}), 500
+    except Exception:
+        return jsonify({"output": [], "error": "Internal server error"}), 500
 
 
 @app.route("/api/test", methods=["POST"])
@@ -416,6 +544,9 @@ def run_tests():
     """Run user code against multiple test cases for recall mode."""
     try:
         data = request.get_json()
+        if not data:
+            return jsonify({"results": [], "error": "Invalid request body"}), 400
+
         code = data.get("code", "")
         test_cases = data.get("testCases", [])
 
@@ -423,6 +554,8 @@ def run_tests():
             return jsonify({"results": [], "error": "No code provided"}), 400
         if not test_cases:
             return jsonify({"results": [], "error": "No test cases provided"}), 400
+        if len(code) > MAX_CODE_LENGTH:
+            return jsonify({"results": [], "error": f"Code exceeds maximum length of {MAX_CODE_LENGTH} characters"}), 400
 
         results = []
         for tc in test_cases:
@@ -435,42 +568,8 @@ def run_tests():
 
             try:
                 with contextlib.redirect_stdout(output_buffer):
-                    safe_builtins = dict(vars(builtins))
-                    for name in ["exit", "quit", "__loader__", "__spec__"]:
-                        safe_builtins.pop(name, None)
-
-                    exec_globals = {
-                        "__builtins__": safe_builtins,
-                        "__name__": "__main__",
-                        "math": math,
-                        "hashlib": hashlib,
-                        "sqlite3": sqlite3,
-                        "ast": ast,
-                        "threading": threading,
-                        "os": os,
-                        "itertools": itertools,
-                        "asyncio": asyncio,
-                        "copy": copy,
-                        "dataclasses": dataclasses,
-                        "functools": functools,
-                        "pickle": pickle,
-                        "re": re,
-                        "signal": signal,
-                        "time": time,
-                        "typing": typing,
-                        "weakref": weakref,
-                        "collections": collections,
-                        "json": json_module,
-                        "abc": abc,
-                    }
-                    if requests_module:
-                        exec_globals["requests"] = requests_module
-                    if bcrypt_module:
-                        exec_globals["bcrypt"] = bcrypt_module
-                    if psycopg2_module:
-                        exec_globals["psycopg2"] = psycopg2_module
-
-                    exec(full_code, exec_globals)
+                    exec_globals = _build_safe_globals()
+                    _exec_with_timeout(full_code, exec_globals, EXEC_TIMEOUT_SECONDS)
 
                 actual = output_buffer.getvalue().strip()
                 passed = actual == tc_expected
@@ -481,40 +580,43 @@ def run_tests():
                     "expected": tc_expected,
                     "error": None,
                 })
-            except Exception as e:
+            except CodeExecutionTimeout as e:
                 results.append({
                     "id": tc_id,
                     "passed": False,
                     "actual": output_buffer.getvalue().strip(),
                     "expected": tc_expected,
-                    "error": f"{type(e).__name__}: {str(e)}",
+                    "error": str(e),
+                })
+            except Exception as e:
+                tb = traceback_module.format_exc()
+                tb_lines = tb.strip().split("\n")
+                user_tb = []
+                for line in tb_lines:
+                    if '<string>' in line or not line.startswith('  File "'):
+                        user_tb.append(line)
+                    elif line.startswith('Traceback'):
+                        user_tb.append(line)
+                    elif not any(internal in line for internal in ['server.py', 'contextlib', 'threading']):
+                        user_tb.append(line)
+                error_msg = "\n".join(user_tb) if user_tb else f"{type(e).__name__}: {str(e)}"
+                results.append({
+                    "id": tc_id,
+                    "passed": False,
+                    "actual": output_buffer.getvalue().strip(),
+                    "expected": tc_expected,
+                    "error": error_msg,
                 })
 
         return jsonify({"results": results, "error": None})
 
-    except Exception as e:
-        return jsonify({"results": [], "error": str(e)}), 500
+    except Exception:
+        return jsonify({"results": [], "error": "Internal server error"}), 500
 
 
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify({"status": "healthy"})
-
-
-# Debug route — check if dist exists on Railway
-@app.route("/debug/dist", methods=["GET"])
-def debug_dist():
-    exists = os.path.isdir(STATIC_DIR)
-    files = os.listdir(STATIC_DIR) if exists else []
-    cwd = os.getcwd()
-    cwd_files = os.listdir(cwd)
-    return jsonify({
-        "STATIC_DIR": STATIC_DIR,
-        "exists": exists,
-        "files": files,
-        "cwd": cwd,
-        "cwd_files": cwd_files,
-    })
 
 
 # Serve React frontend — catch all non-API routes
@@ -526,7 +628,7 @@ def serve_frontend(path):
     index = os.path.join(STATIC_DIR, "index.html")
     if os.path.isfile(index):
         return send_from_directory(STATIC_DIR, "index.html")
-    return jsonify({"error": "Frontend not built", "dist_path": STATIC_DIR, "exists": os.path.isdir(STATIC_DIR)}), 500
+    return jsonify({"error": "Frontend not built"}), 500
 
 
 init_db()

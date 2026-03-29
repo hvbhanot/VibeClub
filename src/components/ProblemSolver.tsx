@@ -22,8 +22,10 @@ import {
 } from 'lucide-react';
 import type { Problem, Difficulty, ProblemProgress, SubmissionResult } from '@/types';
 
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
+
 // GitHub One Dark theme colors
-const oneDarkTheme: any = {
+const oneDarkTheme: Parameters<Monaco['editor']['defineTheme']>[1] = {
   base: 'vs-dark' as const,
   inherit: true,
   rules: [
@@ -146,8 +148,7 @@ export function ProblemSolver({
   // Server-side Python code execution
   const runPythonCode = async (code: string): Promise<{ output: string[]; error?: string }> => {
     try {
-      const apiBase = import.meta.env.VITE_API_URL || '/api';
-      const response = await fetch(`${apiBase}/execute`, {
+      const response = await fetch(`${API_BASE}/execute`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -176,18 +177,16 @@ export function ProblemSolver({
     setIsRunning(true);
     setTerminalOutput([]);
     setTerminalError(null);
-    
-    console.log('Running code:', fixedCode);
+
     const result = await runPythonCode(fixedCode);
-    console.log('Result:', result);
-    
+
     setTerminalOutput(result.output);
     setLastExecutionResult(result);
-    
+
     if (result.error) {
       setTerminalError(result.error);
     }
-    
+
     setIsRunning(false);
   };
 
@@ -199,12 +198,16 @@ export function ProblemSolver({
     setTerminalError(null);
 
     try {
-      const apiBase = import.meta.env.VITE_API_URL || '/api';
-      const response = await fetch(`${apiBase}/test`, {
+      const response = await fetch(`${API_BASE}/test`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code: fixedCode, testCases: problem.testCases }),
       });
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+
       const data = await response.json();
       setTestResults(data.results || []);
 
@@ -217,9 +220,10 @@ export function ProblemSolver({
         output: [`${passed}/${total}`],
         error: data.error || undefined,
       });
-    } catch {
-      setTerminalError('Failed to connect to test server');
-      setLastExecutionResult({ output: [], error: 'Failed to connect to test server' });
+    } catch (error) {
+      const msg = `Failed to connect to test server: ${error instanceof Error ? error.message : 'Unknown error'}`;
+      setTerminalError(msg);
+      setLastExecutionResult({ output: [], error: msg });
     }
     setIsRunning(false);
   };
@@ -1008,7 +1012,11 @@ export function ProblemSolver({
                 ))}
                 {terminalError && (
                   <div className="mt-2 pt-2 border-t border-red-500/20">
-                    <span className="text-red-400">{terminalError}</span>
+                    <div className="flex items-center gap-2 mb-1">
+                      <XCircle className="w-4 h-4 text-red-400 shrink-0" />
+                      <span className="text-red-400 font-semibold text-xs">Runtime Error</span>
+                    </div>
+                    <pre className="text-red-400 whitespace-pre-wrap text-xs leading-relaxed">{terminalError}</pre>
                   </div>
                 )}
                 {problem.expectedOutput && !terminalError && terminalOutput.length > 0 && (

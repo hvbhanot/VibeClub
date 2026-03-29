@@ -49,10 +49,10 @@ const getCategoryLabel = (category: Category) => {
     'type': 'Type',
     'security': 'Security',
     'performance': 'Perf',
-    'concurrency': 'Concurrent',
+    'concurrency': 'Async',
     'algorithm': 'Algo',
     'syntax': 'Syntax',
-    'edge-case': 'Edge Case',
+    'edge-case': 'Edge',
     'pitfall': 'Pitfall',
     'oop': 'OOP',
     'advanced': 'Advanced'
