@@ -237,14 +237,25 @@ export function ProblemsPage({ userProgress, onSelectProblem }: ProblemsPageProp
         </div>
 
         {/* Count */}
-        <div className="flex items-center justify-between mb-3 px-1">
+        <div className="flex items-center justify-between mb-3 px-2">
           <span className="text-[13px] text-white/30">
             {filteredProblems.length === allProblems.length ? `${allProblems.length} problems` : `${filteredProblems.length} of ${allProblems.length}`}
           </span>
         </div>
 
-        {/* Problem list */}
-        <div className="space-y-1.5">
+        {/* Table */}
+        <div className="rounded-xl border border-white/[0.06] overflow-hidden bg-[#12141A]">
+          {/* Table header */}
+          <div className="grid grid-cols-[60px_50px_1fr_140px_100px_100px] items-center px-6 py-3 border-b border-white/[0.06] bg-white/[0.02]">
+            <span className="text-[13px] font-medium text-white/40">Status</span>
+            <span className="text-[13px] font-medium text-white/40">#</span>
+            <span className="text-[13px] font-medium text-white/40">Problem</span>
+            <span className="text-[13px] font-medium text-white/40">Topics</span>
+            <span className="text-[13px] font-medium text-white/40">Mode</span>
+            <span className="text-[13px] font-medium text-white/40 text-right">Difficulty</span>
+          </div>
+
+          {/* Rows */}
           {filteredProblems.length > 0 ? (
             filteredProblems.map((problem, index) => {
               const progress = userProgress.problems[problem.id];
@@ -255,51 +266,51 @@ export function ProblemsPage({ userProgress, onSelectProblem }: ProblemsPageProp
                 <div
                   key={problem.id}
                   onClick={() => handleProblemClick(problem)}
-                  className={`flex items-center gap-4 px-5 py-4 rounded-xl cursor-pointer transition-all group ${
-                    isSolved
-                      ? 'bg-[#4ADE80]/[0.03] hover:bg-[#4ADE80]/[0.06] border border-[#4ADE80]/[0.06]'
-                      : 'bg-[#12141A] hover:bg-[#171920] border border-white/[0.04] hover:border-white/[0.08]'
-                  }`}
+                  className="grid grid-cols-[60px_50px_1fr_140px_100px_100px] items-center px-6 py-4 border-b border-white/[0.04] hover:bg-white/[0.03] cursor-pointer transition-colors group"
                 >
                   {/* Status */}
-                  <div className="w-6 flex-shrink-0">
+                  <div>
                     {isSolved ? (
                       <CheckCircle2 className="w-5 h-5 text-[#4ADE80]" />
                     ) : (
-                      <Circle className="w-5 h-5 text-white/10 group-hover:text-white/20 transition-colors" />
+                      <span className="text-white/20 text-sm">—</span>
                     )}
                   </div>
 
                   {/* Number */}
-                  <span className="text-[13px] font-mono text-white/20 w-8 flex-shrink-0">
-                    {String(index + 1).padStart(3, '0')}
+                  <span className="text-[14px] font-mono text-white/25">
+                    {String(index + 1).padStart(2, '0')}.
                   </span>
 
                   {/* Title */}
-                  <span className={`flex-1 text-[15px] font-medium ${
-                    isSolved ? 'text-white/50' : 'text-white/80 group-hover:text-white'
-                  } transition-colors`}>
+                  <span className={`text-[15px] font-medium pr-4 ${
+                    isSolved ? 'text-white/50' : 'text-white/85 group-hover:text-white'
+                  } transition-colors truncate`}>
                     {problem.title}
                   </span>
 
-                  {/* Category */}
-                  <span className="text-[12px] text-white/30 bg-white/[0.04] px-2.5 py-1 rounded-md flex-shrink-0">
-                    {getCategoryLabel(problem.category)}
-                  </span>
+                  {/* Category tag */}
+                  <div className="flex gap-1.5">
+                    <span className="text-[12px] text-white/50 bg-white/[0.06] px-2.5 py-1 rounded-md">
+                      {getCategoryLabel(problem.category)}
+                    </span>
+                  </div>
 
                   {/* Mode */}
-                  <span className="text-[12px] text-white/30 flex items-center gap-1 w-16 flex-shrink-0">
-                    <tc.icon className="w-3 h-3" />
+                  <span className="text-[13px] text-white/40 flex items-center gap-1.5">
+                    <tc.icon className="w-3.5 h-3.5" />
                     {tc.label}
                   </span>
 
                   {/* Difficulty */}
-                  <span className={`text-[12px] font-medium px-2.5 py-1 rounded-full border flex-shrink-0 ${
-                    problem.difficulty === 'easy' ? 'badge-easy' :
-                    problem.difficulty === 'medium' ? 'badge-medium' : 'badge-hard'
-                  }`}>
-                    {problem.difficulty.charAt(0).toUpperCase() + problem.difficulty.slice(1)}
-                  </span>
+                  <div className="text-right">
+                    <span className={`text-[12px] font-semibold px-3 py-1 rounded-full border inline-block ${
+                      problem.difficulty === 'easy' ? 'badge-easy' :
+                      problem.difficulty === 'medium' ? 'badge-medium' : 'badge-hard'
+                    }`}>
+                      {problem.difficulty.charAt(0).toUpperCase() + problem.difficulty.slice(1)}
+                    </span>
+                  </div>
                 </div>
               );
             })
