@@ -411,45 +411,64 @@ def update_progress(username, problem_id):
 # Sandboxed code execution helpers
 # ---------------------------------------------------------------------------
 
+ALLOWED_MODULES = {
+    "math": math,
+    "hashlib": hashlib,
+    "ast": ast,
+    "itertools": itertools,
+    "copy": copy,
+    "dataclasses": dataclasses,
+    "functools": functools,
+    "re": re,
+    "time": time,
+    "typing": typing,
+    "weakref": weakref,
+    "collections": collections,
+    "json": json_module,
+    "abc": abc,
+    "threading": threading,
+    "asyncio": asyncio,
+    "pickle": pickle,
+    "signal": signal,
+    "os": os,
+    "sqlite3": sqlite3,
+    "random": random,
+    "string": string,
+    "io": io,
+    "sys": sys,
+}
+
+if requests_module:
+    ALLOWED_MODULES["requests"] = requests_module
+if bcrypt_module:
+    ALLOWED_MODULES["bcrypt"] = bcrypt_module
+if psycopg2_module:
+    ALLOWED_MODULES["psycopg2"] = psycopg2_module
+
+
+def _safe_import(name, *args, **kwargs):
+    """Only allow importing whitelisted modules."""
+    if name in ALLOWED_MODULES:
+        return ALLOWED_MODULES[name]
+    raise ImportError(f"Module '{name}' is not available in the sandbox")
+
+
 def _build_safe_globals():
     """Build a restricted globals dict for sandboxed code execution."""
     safe_builtins = dict(vars(builtins))
-    # Remove dangerous builtins
     for name in ["exit", "quit", "__loader__", "__spec__",
-                 "open", "__import__", "exec", "eval", "compile",
-                 "input", "breakpoint", "globals", "locals"]:
+                 "open", "exec", "eval", "compile",
+                 "input", "breakpoint"]:
         safe_builtins.pop(name, None)
+    # Replace __import__ with a restricted version
+    safe_builtins["__import__"] = _safe_import
 
     exec_globals = {
         "__builtins__": safe_builtins,
         "__name__": "__main__",
-        "math": math,
-        "hashlib": hashlib,
-        "ast": ast,
-        "itertools": itertools,
-        "copy": copy,
-        "dataclasses": dataclasses,
-        "functools": functools,
-        "re": re,
-        "time": time,
-        "typing": typing,
-        "weakref": weakref,
-        "collections": collections,
-        "json": json_module,
-        "abc": abc,
-        "threading": threading,
-        "asyncio": asyncio,
-        "pickle": pickle,
-        "signal": signal,
-        "os": os,
-        "sqlite3": sqlite3,
     }
-    if requests_module:
-        exec_globals["requests"] = requests_module
-    if bcrypt_module:
-        exec_globals["bcrypt"] = bcrypt_module
-    if psycopg2_module:
-        exec_globals["psycopg2"] = psycopg2_module
+    # Pre-inject all allowed modules so code can use them without import
+    exec_globals.update(ALLOWED_MODULES)
     return exec_globals
 
 
