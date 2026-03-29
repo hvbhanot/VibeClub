@@ -390,9 +390,6 @@ export function ProblemsPage({ userProgress, onSelectProblem, currentUser, curre
               </div>
             )}
 
-            <p className="text-center text-[12px] text-white/15 mt-4">
-              <kbd className="px-1 py-0.5 rounded border border-white/10 text-[11px]">Ctrl+Enter</kbd> run · <kbd className="px-1 py-0.5 rounded border border-white/10 text-[11px]">Ctrl+Shift+Enter</kbd> submit · <kbd className="px-1 py-0.5 rounded border border-white/10 text-[11px]">Ctrl+H</kbd> hint
-            </p>
           </div>
         </div>
       </div>
