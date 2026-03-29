@@ -7,6 +7,8 @@ import { LeaderboardPage } from '@/components/LeaderboardPage';
 import { TipsPage } from '@/components/TipsPage';
 import { ProblemSolver } from '@/components/ProblemSolver';
 import { useAuth, getUserProgress, saveUserProgress, getStreaks, getDailyChallenge } from '@/hooks/useAuth';
+
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 import type { Problem, UserProgress } from '@/types';
 import { problems } from '@/data/problems';
 import { Loader2 } from 'lucide-react';
@@ -18,17 +20,20 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [currentStreak, setCurrentStreak] = useState(0);
   const [dailyProblemId, setDailyProblemId] = useState<number | null>(null);
+  const [leaderboard, setLeaderboard] = useState<{ rank: number; username: string; totalScore: number; solvedCount: number }[]>([]);
 
   useEffect(() => {
     if (currentUser) {
       const loadData = async () => {
-        const [progress, streaks, daily] = await Promise.all([
+        const [progress, streaks, daily, lb] = await Promise.all([
           getUserProgress(currentUser),
           getStreaks(currentUser),
           getDailyChallenge(),
+          fetch(`${API_BASE}/leaderboard`).then(r => r.json()).catch(() => ({ leaderboard: [] })),
         ]);
         setUserProgress(progress);
         setCurrentStreak(streaks.currentStreak);
+        setLeaderboard(lb.leaderboard || []);
         if (daily.seed) {
           setDailyProblemId(problems[daily.seed % problems.length].id);
         }
@@ -175,6 +180,10 @@ function App() {
               <ProblemsPage
                 userProgress={userProgress}
                 onSelectProblem={handleSelectProblem}
+                currentUser={currentUser}
+                currentStreak={currentStreak}
+                dailyProblem={dailyProblemId ? problems.find(p => p.id === dailyProblemId) || null : null}
+                leaderboard={leaderboard}
               />
             }
           />
@@ -184,6 +193,10 @@ function App() {
               <ProblemsPage
                 userProgress={userProgress}
                 onSelectProblem={handleSelectProblem}
+                currentUser={currentUser}
+                currentStreak={currentStreak}
+                dailyProblem={dailyProblemId ? problems.find(p => p.id === dailyProblemId) || null : null}
+                leaderboard={leaderboard}
               />
             }
           />
