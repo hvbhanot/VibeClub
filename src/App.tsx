@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { LandingPage } from '@/components/LandingPage';
 import { ProblemsPage } from '@/components/ProblemsPage';
-import { LeaderboardPage } from '@/components/LeaderboardPage';
+
 import { TipsPage } from '@/components/TipsPage';
 import { ProblemSolver } from '@/components/ProblemSolver';
 import { useAuth, getUserProgress, saveUserProgress, getStreaks, getDailyChallenge } from '@/hooks/useAuth';
@@ -99,11 +99,7 @@ function App() {
     }
   }, [selectedProblem]);
 
-  const handleSelectDaily = useCallback(() => {
-    if (!dailyProblemId) return;
-    const problem = problems.find(p => p.id === dailyProblemId);
-    if (problem) setSelectedProblem(problem);
-  }, [dailyProblemId]);
+  // dailyProblemId and leaderboard are passed to ProblemsPage sidebar
 
   if (isLoading || authLoading) {
     return (
@@ -169,9 +165,7 @@ function App() {
           currentUser={currentUser}
           totalPoints={totalPoints}
           currentStreak={currentStreak}
-          dailyProblemId={dailyProblemId}
           onLogout={logout}
-          onSelectDaily={handleSelectDaily}
         />
         <Routes>
           <Route
@@ -198,12 +192,6 @@ function App() {
                 dailyProblem={dailyProblemId ? problems.find(p => p.id === dailyProblemId) || null : null}
                 leaderboard={leaderboard}
               />
-            }
-          />
-          <Route
-            path="/leaderboard"
-            element={
-              <LeaderboardPage currentUser={currentUser} />
             }
           />
           <Route path="/tips" element={<TipsPage />} />

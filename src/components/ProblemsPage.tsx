@@ -56,6 +56,8 @@ export function ProblemsPage({ userProgress, onSelectProblem, currentUser, curre
   const [difficultyFilter, setDifficultyFilter] = useState<Difficulty | 'all'>('all');
   const [categoryFilter, setCategoryFilter] = useState<Category | 'all'>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'solved' | 'unsolved'>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const PROBLEMS_PER_PAGE = 15;
   const isLoggedIn = !!currentUser;
 
   useEffect(() => { setShuffledProblems(shuffleArray(allProblems)); }, []);
@@ -70,6 +72,13 @@ export function ProblemsPage({ userProgress, onSelectProblem, currentUser, curre
       return true;
     });
   }, [shuffledProblems, searchQuery, difficultyFilter, categoryFilter, statusFilter, userProgress]);
+
+  // Reset page when filters change
+  useEffect(() => { setCurrentPage(1); }, [searchQuery, difficultyFilter, categoryFilter, statusFilter]);
+
+  const totalPages = Math.ceil(filteredProblems.length / PROBLEMS_PER_PAGE);
+  const paginatedProblems = filteredProblems.slice((currentPage - 1) * PROBLEMS_PER_PAGE, currentPage * PROBLEMS_PER_PAGE);
+  const globalIndexOffset = (currentPage - 1) * PROBLEMS_PER_PAGE;
 
   const handleProblemClick = (problem: Problem) => {
     if (isLoggedIn) onSelectProblem(problem);
@@ -281,8 +290,8 @@ export function ProblemsPage({ userProgress, onSelectProblem, currentUser, curre
               </div>
 
               {/* Rows */}
-              {filteredProblems.length > 0 ? (
-                filteredProblems.map((problem, index) => {
+              {paginatedProblems.length > 0 ? (
+                paginatedProblems.map((problem, index) => {
                   const progress = userProgress.problems[problem.id];
                   const isSolved = progress?.solved;
 
@@ -299,7 +308,7 @@ export function ProblemsPage({ userProgress, onSelectProblem, currentUser, curre
                           <span className="text-white/20 text-sm">—</span>
                         )}
                       </div>
-                      <span className="text-[14px] font-mono text-white/25">{index + 1}.</span>
+                      <span className="text-[14px] font-mono text-white/25">{globalIndexOffset + index + 1}.</span>
                       <span className={`text-[15px] font-medium pr-4 truncate ${
                         isSolved ? 'text-white/50' : 'text-white/85 group-hover:text-white'
                       } transition-colors`}>
@@ -325,6 +334,57 @@ export function ProblemsPage({ userProgress, onSelectProblem, currentUser, curre
                 </div>
               )}
             </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-1.5 mt-6">
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="w-10 h-10 rounded-lg border border-white/[0.08] flex items-center justify-center text-white/40 hover:text-white hover:border-white/[0.15] disabled:opacity-20 disabled:cursor-not-allowed transition-all"
+                >
+                  &lt;
+                </button>
+
+                {(() => {
+                  const pages: (number | '...')[] = [];
+                  if (totalPages <= 7) {
+                    for (let i = 1; i <= totalPages; i++) pages.push(i);
+                  } else {
+                    pages.push(1);
+                    if (currentPage > 3) pages.push('...');
+                    for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) pages.push(i);
+                    if (currentPage < totalPages - 2) pages.push('...');
+                    pages.push(totalPages);
+                  }
+                  return pages.map((page, i) =>
+                    page === '...' ? (
+                      <span key={`dots-${i}`} className="w-10 h-10 flex items-center justify-center text-white/20">...</span>
+                    ) : (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`w-10 h-10 rounded-lg border text-[14px] font-medium transition-all ${
+                          currentPage === page
+                            ? 'bg-[#4ADE80] border-[#4ADE80] text-black font-bold'
+                            : 'border-white/[0.08] text-white/50 hover:text-white hover:border-white/[0.15]'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    )
+                  );
+                })()}
+
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="w-10 h-10 rounded-lg border border-white/[0.08] flex items-center justify-center text-white/40 hover:text-white hover:border-white/[0.15] disabled:opacity-20 disabled:cursor-not-allowed transition-all"
+                >
+                  &gt;
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

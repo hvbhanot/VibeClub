@@ -1,17 +1,15 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LogOut, Flame, Zap } from 'lucide-react';
+import { LogOut, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface NavigationProps {
   currentUser: string;
   totalPoints: number;
   currentStreak: number;
-  dailyProblemId: number | null;
   onLogout: () => void;
-  onSelectDaily: () => void;
 }
 
-export function Navigation({ currentUser, totalPoints, currentStreak, dailyProblemId, onLogout, onSelectDaily }: NavigationProps) {
+export function Navigation({ currentUser, totalPoints, currentStreak, onLogout }: NavigationProps) {
   const location = useLocation();
   const isActive = (path: string) => location.pathname === path;
 
@@ -19,18 +17,15 @@ export function Navigation({ currentUser, totalPoints, currentStreak, dailyProbl
 
   return (
     <header className="sticky top-0 z-50 bg-[#0A0C10]/90 backdrop-blur-md border-b border-white/[0.06]">
-      <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-        {/* Logo */}
+      <div className="max-w-[1400px] mx-auto px-6 h-16 flex items-center justify-between">
         <Link to="/problems" className="flex items-center gap-2.5">
           <span className="font-mono text-base font-bold text-[#4ADE80]">&lt;v/&gt;</span>
           <span className="text-[15px] font-semibold text-white/90 tracking-tight">vibeclub</span>
         </Link>
 
-        {/* Nav */}
         <nav className="flex items-center gap-0.5 bg-white/[0.03] rounded-xl p-1 border border-white/[0.04]">
           {[
             { path: '/problems', label: 'Problems', match: ['/problems', '/'] },
-            { path: '/leaderboard', label: 'Leaderboard', match: ['/leaderboard'] },
             { path: '/tips', label: 'Tips', match: ['/tips'] },
           ].map(item => (
             <Link
@@ -45,18 +40,8 @@ export function Navigation({ currentUser, totalPoints, currentStreak, dailyProbl
               {item.label}
             </Link>
           ))}
-          {dailyProblemId && (
-            <button
-              onClick={onSelectDaily}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[13px] font-medium text-[#FBBF24] hover:bg-[#FBBF24]/10 transition-all"
-            >
-              <Zap className="w-3.5 h-3.5" />
-              Daily
-            </button>
-          )}
         </nav>
 
-        {/* Right */}
         <div className="flex items-center gap-3">
           {currentStreak > 0 && (
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F97316]/[0.08] border border-[#F97316]/[0.12]">
