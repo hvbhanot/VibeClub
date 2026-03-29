@@ -155,7 +155,14 @@ export function AuthForm({ onLogin, onRegister, initialMode = 'login', onSuccess
         <div className="text-center mb-10">
           <div className="font-mono text-2xl font-bold text-[#22C55E] mb-2">&lt;v/&gt;</div>
           <h1 className="text-2xl font-semibold text-[#E4E4E7] mb-1">Join vibeclub</h1>
-          <p className="text-[#A1A1AA] text-sm">TAMUCC students only</p>
+          <p className="text-[#A1A1AA] text-sm">Create your free account</p>
+        </div>
+
+        <div className="mb-5 px-4 py-3 rounded-lg bg-[#22C55E]/5 border border-[#22C55E]/15 text-center">
+          <p className="text-sm text-[#A1A1AA]">
+            Currently in <span className="text-[#22C55E] font-medium">beta</span> — available exclusively to TAMUCC students.
+            A valid Islander email is required to sign up.
+          </p>
         </div>
 
         <form onSubmit={handleRegisterSubmit} className="space-y-5">
