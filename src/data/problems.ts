@@ -1191,9 +1191,9 @@ def get_user(username):
     # Build query
     query = f"SELECT * FROM users WHERE username = '{username}'"
     cursor.execute(query)`,
-    bugLines: [6],
+    bugLines: [7],
     bugExplanations: {
-      6: "NEVER use f-strings or string formatting for SQL queries! This allows attackers to inject malicious SQL. An attacker can input: admin' OR '1'='1 to bypass authentication. Always use parameterized queries: cursor.execute('SELECT * FROM users WHERE username = ?', (username,)). This is how major data breaches happen."
+      7: "NEVER use f-strings or string formatting for SQL queries! This allows attackers to inject malicious SQL. An attacker can input: admin' OR '1'='1 to bypass authentication. Always use parameterized queries: cursor.execute('SELECT * FROM users WHERE username = ?', (username,)). This is how major data breaches happen."
     },
     hint: "String formatting in SQL queries is extremely dangerous. Use parameterized queries with placeholders.",
     hasBugs: true
